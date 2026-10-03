@@ -1,0 +1,9 @@
+import bcrypt from 'bcryptjs';
+import AdminUser from '../models/AdminUser.model.js';
+import { failure, success } from '../utils/apiResponse.js';
+
+export async function listAdminUsers(req, res) { return success(res, await AdminUser.find().select('-passwordHash').sort({ createdAt: -1 }).lean(), 'Admin users fetched successfully'); }
+export async function getAdminUser(req, res) { const user = await AdminUser.findById(req.params.id).select('-passwordHash').lean(); return user ? success(res, user, 'Admin user fetched successfully') : failure(res, 'Admin user not found', [], 404); }
+export async function createAdminUser(req, res) { const { name, email, password, role } = req.body; const user = await AdminUser.create({ name, email: email.toLowerCase(), passwordHash: await bcrypt.hash(password, 12), role }); return success(res, await AdminUser.findById(user._id).select('-passwordHash').lean(), 'Admin user created successfully', null, 201); }
+export async function updateAdminUser(req, res) { const updates = { name: req.body.name, email: req.body.email?.toLowerCase(), role: req.body.role, isActive: req.body.isActive }; if (req.body.password) updates.passwordHash = await bcrypt.hash(req.body.password, 12); const user = await AdminUser.findByIdAndUpdate(req.params.id, { $set: updates }, { new: true, runValidators: true }).select('-passwordHash').lean(); return user ? success(res, user, 'Admin user updated successfully') : failure(res, 'Admin user not found', [], 404); }
+export async function deleteAdminUser(req, res) { if (String(req.params.id) === String(req.adminUser._id)) return failure(res, 'You cannot delete your own account', [], 400); const user = await AdminUser.findByIdAndDelete(req.params.id).select('-passwordHash').lean(); return user ? success(res, user, 'Admin user deleted successfully') : failure(res, 'Admin user not found', [], 404); }

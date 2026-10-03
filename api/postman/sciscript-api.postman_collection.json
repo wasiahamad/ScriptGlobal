@@ -1,0 +1,867 @@
+{
+  "info": {
+    "name": "SciScript API",
+    "description": "Complete request and response collection for the SciScript API. Set baseUrl to http://localhost:8000. Login stores the HTTP-only auth cookies automatically in Postman. Collection variables resource and singleton cover every mounted content route.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "resource",
+      "value": "services",
+      "description": "services, expertise, research, publications, projects, scientific-visuals, faqs, testimonials, navigation, seo"
+    },
+    {
+      "key": "singleton",
+      "value": "home",
+      "description": "home, profile, thesis, editing, publication-support, peer-review, research-integrity, footer, contact, settings"
+    },
+    {
+      "key": "id",
+      "value": "replace-with-mongodb-id"
+    },
+    {
+      "key": "slug",
+      "value": "replace-with-slug"
+    },
+    {
+      "key": "token",
+      "value": "replace-with-reset-token"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"status\": \"ok\" }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "POST Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "response": [
+            {
+              "name": "200 Logged in",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": { \"user\": { \"name\": \"Admin\", \"email\": \"admin@example.com\", \"role\": \"super_admin\" } }\n}"
+            },
+            {
+              "name": "401 Invalid credentials",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid credentials\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          },
+          "response": [
+            {
+              "name": "200 Logged out",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Logout successful\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Refresh access token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          },
+          "response": [
+            {
+              "name": "200 Refreshed",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Token refreshed\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Current admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "response": [
+            {
+              "name": "200 Current user",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"name\": \"Admin\", \"email\": \"admin@example.com\", \"role\": \"super_admin\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/forgot-password"
+          },
+          "response": [
+            {
+              "name": "200 Request accepted",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"If an account exists, reset instructions have been sent\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}\",\n  \"password\": \"NewPassword123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/reset-password"
+          },
+          "response": [
+            {
+              "name": "200 Password reset",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Password reset successful\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "400 Invalid token",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid or expired token\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public Content",
+      "description": "Collection resources: services, expertise, research, publications, projects, scientific-visuals, faqs, testimonials, navigation, seo. Singleton resources: home, profile, thesis, editing, publication-support, peer-review, research-integrity, footer, contact, settings.",
+      "item": [
+        {
+          "name": "GET Public home aggregation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/home"
+          },
+          "response": [
+            {
+              "name": "200 Home data",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"home\": {}, \"services\": [], \"expertise\": [], \"selectedWork\": [], \"scientificVisuals\": [], \"research\": [], \"faqs\": [], \"integrity\": null }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Public global aggregation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/global"
+          },
+          "response": [
+            {
+              "name": "200 Global data",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"navigation\": null, \"footer\": null, \"contact\": null, \"settings\": null, \"seo\": null }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Public collection (all resources)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/{{resource}}?page=1&limit=20&search=&sort=createdAt&order=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "public", "{{resource}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 Published records",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": [],\n  \"pagination\": { \"page\": 1, \"limit\": 20, \"total\": 0, \"totalPages\": 0 }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Public collection record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/{{resource}}/{{slug}}"
+          },
+          "response": [
+            {
+              "name": "200 Published record",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"slug\": \"example\", \"status\": \"published\" }\n}"
+            },
+            {
+              "name": "404 Not found",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Content not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Public singleton",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/{{singleton}}"
+          },
+          "response": [
+            {
+              "name": "200 Published singleton",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"title\": \"SciScript\", \"status\": \"published\" }\n}"
+            },
+            {
+              "name": "404 Not found",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Content not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Public contact inquiry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+1 555 0100\",\n  \"researchArea\": \"Molecular biology\",\n  \"serviceRequired\": \"Scientific writing\",\n  \"projectDescription\": \"I need support preparing a manuscript for journal submission.\",\n  \"preferredContactMethod\": \"email\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/public/contact-inquiries"
+          },
+          "response": [
+            {
+              "name": "201 Inquiry created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Inquiry submitted successfully\",\n  \"data\": { \"id\": \"...\", \"status\": \"new\" }\n}"
+            },
+            {
+              "name": "422 Validation error",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Content",
+      "description": "Requires the auth cookie created by Authentication > POST Login. Set resource to any collection resource. Collection resource values: services, expertise, research, publications, projects, scientific-visuals, faqs, testimonials, navigation, seo.",
+      "item": [
+        {
+          "name": "GET Admin collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}?page=1&limit=20&status=&search="
+          },
+          "response": [
+            {
+              "name": "200 Admin records",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": [],\n  \"pagination\": { \"page\": 1, \"limit\": 20, \"total\": 0, \"totalPages\": 0 }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Admin collection create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Example content\",\n  \"name\": \"Example service\",\n  \"slug\": \"example-content\",\n  \"shortDescription\": \"Short description\",\n  \"description\": \"Detailed content description\",\n  \"status\": \"draft\",\n  \"displayOrder\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Content created successfully\",\n  \"data\": { \"id\": \"...\", \"status\": \"draft\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH Admin collection reorder",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"id\": \"{{id}}\", \"displayOrder\": 1 }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}/reorder"
+          },
+          "response": [
+            {
+              "name": "200 Reordered",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Items reordered successfully\",\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Admin collection record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 Record",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"status\": \"draft\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT Admin collection update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated content\",\n  \"shortDescription\": \"Updated description\",\n  \"displayOrder\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 Updated",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Content updated successfully\",\n  \"data\": { \"id\": \"...\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH Admin collection status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"published\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}/{{id}}/status"
+          },
+          "response": [
+            {
+              "name": "200 Status updated",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Status updated successfully\",\n  \"data\": { \"id\": \"...\", \"status\": \"published\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE Admin collection record",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/{{resource}}/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 Deleted",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Content deleted successfully\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Admin singleton",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/{{singleton}}"
+          },
+          "response": [
+            {
+              "name": "200 Singleton",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT Admin singleton",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated singleton content\",\n  \"content\": {}\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/{{singleton}}"
+          },
+          "response": [
+            {
+              "name": "200 Singleton saved",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Content saved successfully\",\n  \"data\": { \"id\": \"...\" }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Operations",
+      "item": [
+        {
+          "name": "GET Dashboard stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/dashboard"
+          },
+          "response": [
+            {
+              "name": "200 Dashboard",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"services\": 0, \"expertise\": 0, \"projects\": 0, \"publications\": 0, \"drafts\": 0, \"published\": 0, \"recentActivity\": [] }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Activity logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/activity-logs?page=1&limit=20"
+          },
+          "response": [
+            {
+              "name": "200 Activity logs",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": [],\n  \"pagination\": { \"page\": 1, \"limit\": 20, \"total\": 0, \"totalPages\": 0 }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Admin users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/admin-users"
+          },
+          "response": [
+            {
+              "name": "200 Admin users",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Admin user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Content Editor\",\n  \"email\": \"editor@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"editor\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/admin-users"
+          },
+          "response": [
+            {
+              "name": "201 User created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Admin user created successfully\",\n  \"data\": { \"id\": \"...\", \"email\": \"editor@example.com\", \"role\": \"editor\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Admin user by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/admin-users/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 User",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"name\": \"Editor\", \"email\": \"editor@example.com\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT Admin user",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Editor\",\n  \"email\": \"editor@example.com\",\n  \"role\": \"content_manager\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/admin-users/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 User updated",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"role\": \"content_manager\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE Admin user",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/admin-users/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 User deleted",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Admin user deleted successfully\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Contact inquiries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/contact-inquiries"
+          },
+          "response": [
+            {
+              "name": "200 Inquiries",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Public contact inquiries (authenticated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/contact-inquiries"
+          },
+          "response": [
+            {
+              "name": "200 Inquiries",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH Contact inquiry status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/contact-inquiries/{{id}}/status"
+          },
+          "response": [
+            {
+              "name": "200 Inquiry updated",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"status\": \"in_progress\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE Contact inquiry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/contact-inquiries/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 Inquiry deleted",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET Media library",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/media"
+          },
+          "response": [
+            {
+              "name": "200 Media records",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST Media upload",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "JPEG, PNG, WebP, or AVIF; max 8 MB"
+                },
+                {
+                  "key": "altText",
+                  "value": "Scientific illustration",
+                  "type": "text"
+                },
+                {
+                  "key": "caption",
+                  "value": "Example caption",
+                  "type": "text"
+                },
+                {
+                  "key": "category",
+                  "value": "research",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/admin/media"
+          },
+          "response": [
+            {
+              "name": "201 Media uploaded",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"url\": \"/uploads/example.webp\" }\n}"
+            },
+            {
+              "name": "422 File required",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Image file is required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT Media metadata",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"altText\": \"Updated alt text\",\n  \"caption\": \"Updated caption\",\n  \"category\": \"publication\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/media/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 Media updated",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": { \"id\": \"...\", \"altText\": \"Updated alt text\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE Media",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/media/{{id}}"
+          },
+          "response": [
+            {
+              "name": "200 Media deleted",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

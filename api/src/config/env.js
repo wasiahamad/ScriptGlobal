@@ -1,0 +1,45 @@
+import dotenv from "dotenv";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+dotenv.config({
+  path: resolve(dirname(fileURLToPath(import.meta.url)), "../../.env"),
+});
+
+function getMongoUri() {
+  const sourceUri = process.env.MONGO_URI;
+  if (!sourceUri || !sourceUri.startsWith("mongodb+srv://")) return sourceUri;
+
+  const source = new URL(sourceUri);
+  if (source.hostname !== "sciscript.zld8ieq.mongodb.net") return sourceUri;
+
+  const hosts = [
+    "ac-zuzsrwd-shard-00-00.zld8ieq.mongodb.net:27017",
+    "ac-zuzsrwd-shard-00-01.zld8ieq.mongodb.net:27017",
+    "ac-zuzsrwd-shard-00-02.zld8ieq.mongodb.net:27017",
+  ].join(",");
+  return `mongodb://${source.username}:${source.password}@${hosts}/sciscript?authSource=admin&replicaSet=atlas-azt9j5-shard-0&tls=true`;
+}
+
+if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
+  throw new Error("Missing required environment variable: JWT_SECRET");
+}
+
+export const env = {
+  port: Number(process.env.PORT || 8000),
+  nodeEnv: process.env.NODE_ENV || "development",
+  mongoUri:
+    process.env.DISABLE_DATABASE === "true" ? undefined : getMongoUri(),
+  jwtSecret: process.env.JWT_SECRET || "local-development-secret",
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || "30d",
+  cookieName: process.env.COOKIE_NAME || "sciscript_admin_token",
+  publicSiteUrl: process.env.PUBLIC_SITE_URL || "http://localhost:5173",
+  adminSiteUrl: process.env.ADMIN_SITE_URL || "http://localhost:5174",
+  uploadDir: process.env.UPLOAD_DIR || "uploads",
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
+};

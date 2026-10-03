@@ -1,0 +1,20 @@
+import { createContentModel, objectIdArray, objectIdRef } from "./_createContentModel.js";
+export default createContentModel("Publication", "publications", {
+    publicationType: Object,
+    authors: [Object],
+    authorRole: String,
+    journal: String,
+    publisher: String,
+    year: Number,
+    abstract: String,
+    doi: String,
+    pubmedUrl: String,
+    publisherUrl: String,
+    googleScholarUrl: String,
+    pdfUrl: String,
+    coverImage: objectIdRef("Media"),
+    contribution: String,
+    relatedExpertise: objectIdArray("Expertise"),
+    relatedServices: objectIdArray("Service"),
+    seo: objectIdRef("SEO"),
+});
