@@ -74,7 +74,7 @@ export default function Portfolio() {
       />
 
       {/* Hero */}
-      <section className="relative py-20 lg:py-28 bg-gradient-to-br from-navy-50 via-white to-teal-50/30 overflow-hidden">
+      <section className="page-hero page-hero--portfolio relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div

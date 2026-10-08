@@ -43,7 +43,7 @@ export default function InsightDetail() {
     <>
       <SEO title={post.seo_title || post.title} description={post.meta_description || post.excerpt || undefined} canonicalPath={post.canonical_url || `/insights/${post.slug}`} type="article" image={post.featured_image || undefined} siteSettings={settings} jsonLd={articleSchema} />
       <article>
-        <header className="relative py-20 lg:py-28 bg-gradient-to-br from-navy-50 via-white to-teal-50/30 overflow-hidden">
+        <header className="page-hero page-hero--detail relative py-20 lg:py-28 overflow-hidden">
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <Link to="/insights" className="inline-flex items-center gap-1.5 text-sm font-medium text-navy-500 hover:text-teal-600 mb-6"><ArrowLeft className="w-4 h-4" /> All Insights</Link>

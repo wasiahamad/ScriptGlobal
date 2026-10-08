@@ -31,7 +31,7 @@ export default function Insights() {
   return (
     <>
       <SEO title="Scientific Insights" description="Evidence-based insights on scientific writing, biomedical research, literature reviews, scientific editing, and publication support." canonicalPath="/insights" siteSettings={settings} />
-      <section className="relative py-20 lg:py-28 bg-gradient-to-br from-navy-50 via-white to-teal-50/30 overflow-hidden">
+      <section className="page-hero page-hero--insights relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-3xl">
