@@ -5,5 +5,5 @@ export default createContentModel("PublicationSupport", "publication-support", {
     steps: [Object],
     images: objectIdArray("Media"),
     cta: Object,
-    seo: objectIdRef("SEO"),
+    seo: { type: Object, default: {} },
 });

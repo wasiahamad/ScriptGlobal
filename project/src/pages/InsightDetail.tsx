@@ -18,11 +18,19 @@ export default function InsightDetail() {
 
   useEffect(() => {
     (async () => {
-      if (!slug) return;
-      const [current, all] = await Promise.all([getBlogPostBySlug(slug), getBlogPosts()]);
-      setPost(current);
-      setRelated(all.filter((item) => item.slug !== slug && item.category === current?.category).slice(0, 3));
-      setLoading(false);
+      try {
+        setLoading(true);
+        if (!slug) {
+          setPost(null);
+          setRelated([]);
+          return;
+        }
+        const [current, all] = await Promise.all([getBlogPostBySlug(slug), getBlogPosts()]);
+        setPost(current);
+        setRelated(all.filter((item) => item.slug !== slug && item.category === current?.category).slice(0, 3));
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [slug]);
 

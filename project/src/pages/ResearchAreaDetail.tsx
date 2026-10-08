@@ -21,19 +21,27 @@ export default function ResearchAreaDetail() {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      if (!slug) return;
-      const a = await getResearchAreaBySlug(slug);
-      setArea(a);
-      if (a) {
-        const [allProjects, allPubs] = await Promise.all([
-          getProjects(),
-          getPublications(),
-        ]);
-        setProjects(allProjects.filter((p) => p.research_area_id === a.id));
-        setPublications(allPubs.filter((p) => p.research_area_id === a.id));
+      try {
+        setLoading(true);
+        if (!slug) {
+          setArea(null);
+          setProjects([]);
+          setPublications([]);
+          return;
+        }
+        const a = await getResearchAreaBySlug(slug);
+        setArea(a);
+        if (a) {
+          const [allProjects, allPubs] = await Promise.all([
+            getProjects(),
+            getPublications(),
+          ]);
+          setProjects(allProjects.filter((p) => p.research_area_id === a.id));
+          setPublications(allPubs.filter((p) => p.research_area_id === a.id));
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, [slug]);
 
@@ -94,6 +102,13 @@ export default function ResearchAreaDetail() {
               <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-navy-800 text-teal-400 flex items-center justify-center">
                 <Icon className="w-8 h-8" />
               </div>
+              {area.cover_image && (
+                <img
+                  src={typeof area.cover_image === 'string' ? area.cover_image : area.cover_image.url}
+                  alt={area.name}
+                  className="w-28 h-28 rounded-2xl object-cover border border-navy-100 shadow-sm"
+                />
+              )}
               <div>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-navy-900 leading-tight mb-3">
                   {area.name}

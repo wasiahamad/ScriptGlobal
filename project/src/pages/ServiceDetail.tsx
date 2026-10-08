@@ -21,15 +21,22 @@ export default function ServiceDetail() {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      if (!slug) return;
-      const [s, all] = await Promise.all([
-        getServiceBySlug(slug),
-        getServices(),
-      ]);
-      setService(s);
-      setRelated(all.filter((sv) => sv.slug !== slug).slice(0, 3));
-      setLoading(false);
+      try {
+        setLoading(true);
+        if (!slug) {
+          setService(null);
+          setRelated([]);
+          return;
+        }
+        const [s, all] = await Promise.all([
+          getServiceBySlug(slug),
+          getServices(),
+        ]);
+        setService(s);
+        setRelated(all.filter((sv) => sv.slug !== slug).slice(0, 3));
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [slug]);
 
@@ -52,6 +59,8 @@ export default function ServiceDetail() {
   }
 
   const Icon = getIcon(service.icon);
+  const image = typeof service.featured_image === 'string' ? service.featured_image : service.featured_image?.url;
+  const imageAlt = service.featured_image && typeof service.featured_image === 'object' ? service.featured_image.alt || service.title : service.title;
 
   const breadcrumb = {
     '@context': 'https://schema.org',
@@ -115,6 +124,7 @@ export default function ServiceDetail() {
                 {service.short_description}
               </p>
             )}
+            {image && <img src={image} alt={imageAlt} className="mt-8 w-full max-h-96 object-cover rounded-2xl shadow-lg" />}
           </motion.div>
         </div>
       </section>
@@ -154,6 +164,18 @@ export default function ServiceDetail() {
                       </motion.div>
                     ))}
                   </div>
+                </>
+              )}
+              {service.benefits && service.benefits.length > 0 && (
+                <>
+                  <h2 className="text-2xl font-bold text-navy-900 mb-4 mt-10">Benefits</h2>
+                  <ul className="space-y-3">{service.benefits.map((item) => <li key={item} className="flex gap-2 text-navy-600"><CheckCircle2 className="w-5 h-5 text-teal-500 flex-shrink-0" />{item}</li>)}</ul>
+                </>
+              )}
+              {service.process && service.process.length > 0 && (
+                <>
+                  <h2 className="text-2xl font-bold text-navy-900 mb-4 mt-10">Our Process</h2>
+                  <ol className="space-y-3 list-decimal list-inside text-navy-600">{service.process.map((item) => <li key={item}>{typeof item === 'string' ? item : String(item)}</li>)}</ol>
                 </>
               )}
             </motion.div>

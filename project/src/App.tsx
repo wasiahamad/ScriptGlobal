@@ -20,6 +20,7 @@ const Insights = lazy(() => import('@/pages/Insights'));
 const InsightDetail = lazy(() => import('@/pages/InsightDetail'));
 const Contact = lazy(() => import('@/pages/Contact'));
 const Faqs = lazy(() => import('@/pages/Faqs'));
+const LegalPage = lazy(() => import('@/pages/LegalPage'));
 
 function PageFallback() {
   return (
@@ -156,6 +157,8 @@ export default function App() {
                   </Suspense>
                 }
               />
+              <Route path="/privacy" element={<Suspense fallback={<PageFallback />}><LegalPage kind="privacy" /></Suspense>} />
+              <Route path="/terms" element={<Suspense fallback={<PageFallback />}><LegalPage kind="terms" /></Suspense>} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

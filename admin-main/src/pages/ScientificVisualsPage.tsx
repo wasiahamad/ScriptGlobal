@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Image, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { ScientificVisual } from '@/lib/types';
 import { PageHeader, StatusBadge, EmptyState } from '@/components/ui';
 import { DataTable, type Column } from '@/components/DataTable';
@@ -19,6 +19,7 @@ const emptyItem: Partial<ScientificVisual> = {
 };
 
 export default function ScientificVisualsPage() {
+  const supabase = createBackendDataClient();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
   const [items, setItems] = useState<ScientificVisual[]>([]);

@@ -9,10 +9,10 @@ import { getPublications, getPublicPageContent, getResearchAreas } from '@/lib/a
 import type { Publication, ResearchArea } from '@/types';
 
 const supportSteps = [
-  { icon: FileText, title: 'Journal Scope Alignment', desc: 'We help identify journals whose scope matches your research.' },
-  { icon: BookOpen, title: 'Manuscript Formatting', desc: 'Formatting to journal-specific templates, styles, and guidelines.' },
-  { icon: CheckCircle2, title: 'Reporting Guideline Checks', desc: 'Compliance checks against CONSORT, PRISMA, STROBE, and others.' },
-  { icon: Send, title: 'Submission Readiness', desc: 'Cover letters, highlights, declarations, and submission checklists.' },
+  { icon: FileText, iconName: 'file-text', title: 'Journal Scope Alignment', desc: 'We help identify journals whose scope matches your research.' },
+  { icon: BookOpen, iconName: 'book-open', title: 'Manuscript Formatting', desc: 'Formatting to journal-specific templates, styles, and guidelines.' },
+  { icon: CheckCircle2, iconName: 'check-circle', title: 'Reporting Guideline Checks', desc: 'Compliance checks against CONSORT, PRISMA, STROBE, and others.' },
+  { icon: Send, iconName: 'send', title: 'Submission Readiness', desc: 'Cover letters, highlights, declarations, and submission checklists.' },
 ];
 
 export default function PublicationSupport() {
@@ -32,7 +32,21 @@ export default function PublicationSupport() {
     })();
   }, []);
 
-  const cmsSteps = Array.isArray(pageContent?.steps) ? pageContent.steps : supportSteps;
+  const cmsSteps = Array.isArray(pageContent?.steps) && pageContent.steps.length > 0 ? pageContent.steps : supportSteps;
+  const pageText = (key: string, fallback: string) =>
+    typeof pageContent?.[key] === 'string' && String(pageContent[key]).trim()
+      ? String(pageContent[key])
+      : fallback;
+  const cta = pageContent?.cta && typeof pageContent.cta === 'object' ? pageContent.cta as Record<string, unknown> : {};
+  const getStepIcon = (name: unknown, fallback: typeof FileText) => {
+    switch (name) {
+      case 'book-open': return BookOpen;
+      case 'check-circle': return CheckCircle2;
+      case 'send': return Send;
+      case 'file-text': return FileText;
+      default: return fallback;
+    }
+  };
 
   const getAreaName = (id: string | null) => {
     if (!id) return null;
@@ -43,16 +57,16 @@ export default function PublicationSupport() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
-      { '@type': 'ListItem', position: 2, name: 'Publication Support', item: '/publication-support' },
+      { '@type': 'ListItem', position: 1, name: pageText('breadcrumb_home_label', 'Home'), item: '/' },
+      { '@type': 'ListItem', position: 2, name: pageText('breadcrumb_label', 'Publication Support'), item: '/publication-support' },
     ],
   };
 
   return (
     <>
       <SEO
-        title="Publication Support Services"
-        description="Comprehensive publication support: journal scope alignment, manuscript formatting, reporting guideline checks, cover letters, response-to-reviewers, and submission checklists."
+        title={pageText('seo_title', 'Publication Support Services')}
+        description={pageText('seo_description', 'Comprehensive publication support: journal scope alignment, manuscript formatting, reporting guideline checks, cover letters, response-to-reviewers, and submission checklists.')}
         canonicalPath="/publication-support"
         siteSettings={settings}
         jsonLd={breadcrumb}
@@ -69,14 +83,13 @@ export default function PublicationSupport() {
             className="max-w-3xl"
           >
             <span className="text-sm font-semibold uppercase tracking-wider text-teal-600 mb-3 block">
-              Publication Support
+              {pageText('eyebrow', 'Publication Support')}
             </span>
             <h1 className="text-4xl md:text-5xl font-bold text-navy-900 leading-tight mb-6">
-              Journal Submission & Publication Support
+              {pageText('heading', 'Journal Submission & Publication Support')}
             </h1>
             <p className="text-lg text-navy-500 leading-relaxed">
-              From manuscript formatting and reporting guideline compliance to cover letters and
-              response-to-reviewers — we support your journey from completed manuscript to submitted publication.
+              {pageText('page_content', 'From manuscript formatting and reporting guideline compliance to cover letters and response-to-reviewers — we support your journey from completed manuscript to submitted publication.')}
             </p>
           </motion.div>
         </div>
@@ -86,9 +99,9 @@ export default function PublicationSupport() {
       <section className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
-            eyebrow="How We Help"
-            title="Publication Support Process"
-            subtitle="A structured approach to preparing your manuscript for journal submission."
+            eyebrow={pageText('process_eyebrow', 'How We Help')}
+            title={pageText('process_heading', 'Publication Support Process')}
+            subtitle={pageText('process_description', 'A structured approach to preparing your manuscript for journal submission.')}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {cmsSteps.map((item, i) => {
@@ -96,6 +109,7 @@ export default function PublicationSupport() {
               const step = typeof item === 'object' && item !== null ? item as Record<string, unknown> : { title: String(item) } as Record<string, unknown>;
               const title = typeof step.title === 'string' ? step.title : fallback.title;
               const description = typeof step.description === 'string' ? step.description : fallback.desc;
+              const StepIcon = getStepIcon(step.icon, fallback.icon);
               return (
               <motion.div
                 key={title}
@@ -107,7 +121,7 @@ export default function PublicationSupport() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-navy-50 flex items-center justify-center">
-                    <fallback.icon className="w-6 h-6 text-navy-700" />
+                    <StepIcon className="w-6 h-6 text-navy-700" />
                   </div>
                   <span className="text-3xl font-bold text-navy-100">{i + 1}</span>
                 </div>
@@ -124,9 +138,9 @@ export default function PublicationSupport() {
       <section className="py-20 lg:py-28 bg-offwhite">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
-            eyebrow="Research Outputs"
-            title="Publications & Research Outputs"
-            subtitle="Published research outputs associated with our publication support work."
+            eyebrow={pageText('publications_eyebrow', 'Research Outputs')}
+            title={pageText('publications_heading', 'Publications & Research Outputs')}
+            subtitle={pageText('publications_description', 'Published research outputs associated with our publication support work.')}
             center={false}
           />
 
@@ -138,8 +152,8 @@ export default function PublicationSupport() {
             </div>
           ) : publications.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-navy-100">
-              <p className="text-navy-400">Publication details will appear here once available.</p>
-              <p className="text-sm text-navy-300 mt-2">No fabricated publications, DOIs, or journal acceptances are displayed.</p>
+              <p className="text-navy-400">{pageText('empty_title', 'Publication details will appear here once available.')}</p>
+              <p className="text-sm text-navy-300 mt-2">{pageText('empty_description', 'No fabricated publications, DOIs, or journal acceptances are displayed.')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -187,7 +201,7 @@ export default function PublicationSupport() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-sm font-medium text-teal-600 hover:text-teal-700 flex-shrink-0"
                       >
-                        DOI
+                        {pageText('doi_label', 'DOI')}
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
@@ -200,12 +214,12 @@ export default function PublicationSupport() {
       </section>
 
       <CTASection
-        title="Ready for Publication Support?"
-        subtitle="Let us help you prepare your manuscript for journal submission — from formatting to cover letters to response-to-reviewers."
-        primaryLabel="Request Publication Support"
-        primaryTo="/contact"
-        secondaryLabel="View Services"
-        secondaryTo="/services"
+        title={pageText('cta_title', 'Ready for Publication Support?')}
+        subtitle={pageText('cta_description', 'Let us help you prepare your manuscript for journal submission — from formatting to cover letters to response-to-reviewers.')}
+        primaryLabel={typeof cta.text === 'string' ? cta.text : 'Request Publication Support'}
+        primaryTo={typeof cta.url === 'string' ? cta.url : '/contact'}
+        secondaryLabel={pageText('secondary_cta_text', 'View Services')}
+        secondaryTo={pageText('secondary_cta_url', '/services')}
       />
     </>
   );

@@ -16,5 +16,5 @@ export default createContentModel("Publication", "publications", {
     contribution: String,
     relatedExpertise: objectIdArray("Expertise"),
     relatedServices: objectIdArray("Service"),
-    seo: objectIdRef("SEO"),
+    seo: { type: Object, default: {} },
 });

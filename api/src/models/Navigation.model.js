@@ -1,7 +1,7 @@
 import { createContentModel, objectIdRef } from "./_createContentModel.js";
 export default createContentModel("Navigation", "navigation", {
     label: String,
-    type: { type: String, enum: ["link", "dropdown"] },
+    type: { type: String, enum: ["link", "dropdown"], default: "link" },
     url: String,
     target: String,
     parentId: objectIdRef("Navigation"),

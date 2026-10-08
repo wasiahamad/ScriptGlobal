@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Atom, ArrowRight, ChevronDown } from 'lucide-react';
+import { getPublicNavigation } from '@/lib/api';
+import { useSiteData } from '@/context/SiteDataContext';
 
-const navLinks = [
+const defaultNavLinks = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
   { to: '/services', label: 'Services' },
-  { to: '/insights', label: 'Research' },
+  { to: '/insights', label: 'Insights' },
   { to: '/research-areas', label: 'Expertise' },
   { to: '/portfolio', label: 'Work' },
   { to: '/faqs', label: 'FAQ' },
@@ -15,6 +17,8 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const { settings } = useSiteData();
+  const [navLinks, setNavLinks] = useState(defaultNavLinks);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -29,6 +33,12 @@ export default function Navbar() {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    getPublicNavigation().then((items) => {
+      if (items.length > 0) setNavLinks(items.map((item) => ({ to: item.url || '/', label: item.label })));
+    });
+  }, []);
 
   return (
     <>
@@ -48,10 +58,10 @@ export default function Navbar() {
               </span>
               <span className="flex flex-col leading-tight">
                   <span className="font-bold text-base lg:text-lg text-[#0a0a0a] transition-colors">
-                  SciScript
+                  {settings?.brand_name || 'SciScript'}
                 </span>
                   <span className="text-[10px] font-medium uppercase tracking-wider text-[#0f766e] transition-colors">
-                  Global Scientific Writing
+                  {settings?.tagline || 'Global Scientific Writing'}
                 </span>
               </span>
             </Link>
@@ -88,7 +98,7 @@ export default function Navbar() {
                 to="/contact"
                 className="group hidden lg:inline-flex items-center gap-2 px-5 py-3 text-[13px] font-bold bg-navy-800 text-white rounded-xl hover:bg-teal-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >
-                Discuss Your Research
+                {settings?.hero_cta_primary || 'Discuss Your Research'}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <button
@@ -144,7 +154,7 @@ export default function Navbar() {
                   to="/contact"
                   className="mt-4 flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold bg-navy-800 text-white rounded-xl hover:bg-teal-700 transition-all shadow-md"
                 >
-                  Discuss Your Research
+                  {settings?.hero_cta_primary || 'Discuss Your Research'}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

@@ -2,10 +2,33 @@ import { useEffect, useState } from 'react';
 import { FileText, Plus, Save, Trash2 } from 'lucide-react';
 import { apiRequest } from '@/lib/apiClient';
 import { PageHeader, EmptyState } from '@/components/ui';
-import { FormSection, Field } from '@/components/Form';
+import { FormSection, Field, ImageUploadField } from '@/components/Form';
 import { useToast } from '@/lib/toast';
 
 type BlogPost = Record<string, unknown> & { id?: string };
+
+function normalizePost(value: Record<string, unknown>): BlogPost {
+  return {
+    ...value,
+    id: String(value._id || value.id || ''),
+    featured_image: value.featuredImage || value.featured_image || '',
+    seo_title: value.seoTitle || value.seo_title || '',
+    meta_description: value.metaDescription || value.meta_description || '',
+    canonical_url: value.canonicalUrl || value.canonical_url || '',
+    published_at: value.publishedAt || value.published_at || null,
+  };
+}
+
+function serializePost(post: BlogPost) {
+  const { id: _id, featured_image, seo_title, meta_description, canonical_url, published_at: _publishedAt, ...rest } = post;
+  return {
+    ...rest,
+    featuredImage: featured_image || '',
+    seoTitle: seo_title || '',
+    metaDescription: meta_description || '',
+    canonicalUrl: canonical_url || '',
+  };
+}
 
 const emptyPost: BlogPost = {
   title: '', slug: '', excerpt: '', content: '', author: '', category: '',
@@ -22,7 +45,10 @@ export default function InsightsPage() {
 
   const load = async () => {
     setLoading(true);
-    try { setPosts(await apiRequest<BlogPost[]>('/api/v1/admin/blog-posts?limit=100')); }
+    try {
+      const data = await apiRequest<Record<string, unknown>[]>('/api/v1/admin/blog-posts?limit=100');
+      setPosts(data.map(normalizePost));
+    }
     catch (error) { toast(error instanceof Error ? error.message : 'Unable to load Insights', 'error'); }
     finally { setLoading(false); }
   };
@@ -34,7 +60,7 @@ export default function InsightsPage() {
     setSaving(true);
     try {
       const path = editing.id ? `/api/v1/admin/blog-posts/${editing.id}` : '/api/v1/admin/blog-posts';
-      await apiRequest(path, { method: editing.id ? 'PUT' : 'POST', body: JSON.stringify(editing) });
+      await apiRequest(path, { method: editing.id ? 'PUT' : 'POST', body: JSON.stringify(serializePost(editing)) });
       toast('Insight saved successfully');
       setEditing(null);
       await load();
@@ -60,7 +86,12 @@ export default function InsightsPage() {
               <Field label="Slug"><input value={String(editing.slug || '')} onChange={(event) => update('slug', event.target.value)} className="input" /></Field>
               <Field label="Author"><input value={String(editing.author || '')} onChange={(event) => update('author', event.target.value)} className="input" /></Field>
               <Field label="Category"><input value={String(editing.category || '')} onChange={(event) => update('category', event.target.value)} className="input" /></Field>
-              <Field label="Featured image URL"><input value={String(editing.featured_image || '')} onChange={(event) => update('featured_image', event.target.value)} className="input" /></Field>
+              <ImageUploadField
+                label="Featured image"
+                category="Insights"
+                value={String(editing.featured_image || '') || null}
+                onChange={(url) => update('featured_image', url)}
+              />
               <Field label="Status"><select value={String(editing.status || 'draft')} onChange={(event) => update('status', event.target.value)} className="input"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></Field>
             </div>
             <Field label="Excerpt"><textarea value={String(editing.excerpt || '')} onChange={(event) => update('excerpt', event.target.value)} className="input min-h-[90px]" /></Field>

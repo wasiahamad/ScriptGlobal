@@ -31,7 +31,7 @@ export interface Expertise {
   short_description: string;
   detailed_description: string;
   icon: string;
-  cover_image: ImageRef | null;
+  cover_image: ImageRef | string | null;
   gallery: ImageRef[];
   related_services: string[];
   related_projects: string[];
@@ -299,8 +299,10 @@ export interface AdminProfile {
   id: string;
   user_id: string;
   name: string;
+  email?: string;
   role: string;
   status: string;
+  is_active?: boolean;
   last_login: string | null;
   created_at: string;
 }

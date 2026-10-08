@@ -20,6 +20,8 @@ export interface SiteSettings {
   default_meta_description: string | null;
   default_og_image: string | null;
   is_active: boolean;
+  primary_color?: string | null;
+  accent_color?: string | null;
 }
 
 export interface Service {
@@ -28,10 +30,20 @@ export interface Service {
   title: string;
   tagline: string | null;
   icon: string | null;
+  featured_image?: { url: string; alt?: string } | string | null;
+  gallery?: Array<{ url: string; alt?: string } | string>;
   short_description: string | null;
   description: string | null;
   deliverables: string[];
+  benefits?: string[];
+  process?: string[];
+  cta?: { text?: string; url?: string };
+  cta_text?: string | null;
+  cta_url?: string | null;
   display_order: number;
+  featured?: boolean;
+  linkedin_url?: string | null;
+  website_url?: string | null;
   is_featured: boolean;
   is_published: boolean;
   seo_title: string | null;
@@ -43,6 +55,7 @@ export interface ResearchArea {
   slug: string;
   name: string;
   icon: string | null;
+  cover_image?: string | { url: string; alt?: string | null } | null;
   short_description: string | null;
   description: string | null;
   display_order: number;
@@ -126,6 +139,9 @@ export interface Testimonial {
   permission_status: string | null;
   is_published: boolean;
   display_order: number;
+  featured?: boolean;
+  linkedin_url?: string | null;
+  website_url?: string | null;
 }
 
 export interface Faq {
@@ -134,6 +150,10 @@ export interface Faq {
   answer: string | null;
   display_order: number;
   is_published: boolean;
+  category?: string | null;
+  featured?: boolean;
+  related_service?: string | null;
+  related_expertise?: string | null;
 }
 
 export interface BlogPost {

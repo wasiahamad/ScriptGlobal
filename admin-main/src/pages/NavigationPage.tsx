@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Menu as MenuIcon, Trash2, Loader2, GripVertical } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { NavItem } from '@/lib/types';
 import { PageHeader, EmptyState } from '@/components/ui';
 import { ConfirmDialog, Modal } from '@/components/Modal';
@@ -13,6 +13,7 @@ const emptyItem: Partial<NavItem> = {
 };
 
 export default function NavigationPage() {
+  const supabase = createBackendDataClient();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
   const [items, setItems] = useState<NavItem[]>([]);

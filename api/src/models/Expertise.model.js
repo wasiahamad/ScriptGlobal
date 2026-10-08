@@ -5,5 +5,5 @@ export default createContentModel("Expertise", "expertise", {
   gallery: objectIdArray("Media"),
   relatedServices: objectIdArray("Service"),
   relatedProjects: objectIdArray("Project"),
-  seo: objectIdRef("SEO"),
+  seo: { type: Object, default: {} },
 });

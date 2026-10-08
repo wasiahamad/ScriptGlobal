@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Save, Loader2, Settings } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { GlobalSettings } from '@/lib/types';
 import { PageHeader } from '@/components/ui';
 import { FormSection, Field } from '@/components/Form';
@@ -8,6 +8,7 @@ import { useToast } from '@/lib/toast';
 import { useActivityLog } from '@/lib/useActivityLog';
 
 export default function GlobalSettingsPage() {
+  const supabase = createBackendDataClient();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
   const [settings, setSettings] = useState<Partial<GlobalSettings>>({});

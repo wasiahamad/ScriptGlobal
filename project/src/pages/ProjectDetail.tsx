@@ -23,23 +23,31 @@ export default function ProjectDetail() {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      if (!slug) return;
-      const [p, all, ra] = await Promise.all([
-        getProjectBySlug(slug),
-        getProjects(),
-        getResearchAreas(),
-      ]);
-      setProject(p);
-      setResearchAreas(ra);
-      if (p) {
-        setRelated(
-          all
-            .filter((x) => x.slug !== slug && (x.research_area_id === p.research_area_id || x.category === p.category))
-            .slice(0, 3)
-        );
+      try {
+        setLoading(true);
+        if (!slug) {
+          setProject(null);
+          setRelated([]);
+          setResearchAreas([]);
+          return;
+        }
+        const [p, all, ra] = await Promise.all([
+          getProjectBySlug(slug),
+          getProjects(),
+          getResearchAreas(),
+        ]);
+        setProject(p);
+        setResearchAreas(ra);
+        if (p) {
+          setRelated(
+            all
+              .filter((x) => x.slug !== slug && (x.research_area_id === p.research_area_id || x.category === p.category))
+              .slice(0, 3)
+          );
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, [slug]);
 

@@ -6,6 +6,7 @@ import CTASection from '@/components/sections/CTASection';
 import SectionTitle from '@/components/ui/SectionTitle';
 import { useSiteData } from '@/context/SiteDataContext';
 import { getPublicPageContent } from '@/lib/api';
+import { getIcon } from '@/lib/icons';
 
 const capabilities = [
   { icon: FileText, title: 'Research Article Writing', desc: 'Manuscript development grounded in your data, results, and findings.' },
@@ -44,7 +45,15 @@ export default function About() {
 
   const text = (value: unknown, fallback: string) => typeof value === 'string' && value.trim() ? value : fallback;
   const profile = content?.profile && typeof content.profile === 'object' ? content.profile as Record<string, unknown> : content || {};
+  const approach = content?.approach && typeof content.approach === 'object' ? content.approach as Record<string, unknown> : {};
+  const mission = content?.mission && typeof content.mission === 'object' ? content.mission as Record<string, unknown> : {};
+  const founder = content?.founder && typeof content.founder === 'object' ? content.founder as Record<string, unknown> : profile;
+  const principlesSection = content?.principles_section && typeof content.principles_section === 'object' ? content.principles_section as Record<string, unknown> : {};
+  const capabilitiesSection = content?.capabilities_section && typeof content.capabilities_section === 'object' ? content.capabilities_section as Record<string, unknown> : {};
+  const workSection = content?.work_section && typeof content.work_section === 'object' ? content.work_section as Record<string, unknown> : {};
+  const cta = content?.cta && typeof content.cta === 'object' ? content.cta as Record<string, unknown> : {};
   const profileImage = text(profile.image_url || profile.profile_image, 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1000');
+  const founderImage = text(founder.image_url || founder.profile_image, profileImage);
   const dynamicPrinciples = Array.isArray(content?.principles) ? content.principles : principles;
   const dynamicCapabilities = Array.isArray(content?.capabilities) ? content.capabilities : capabilities;
   const dynamicWorkTypes = Array.isArray(content?.work_types) ? content.work_types : workTypes;
@@ -79,10 +88,10 @@ export default function About() {
             className="max-w-3xl"
           >
             <span className="text-sm font-semibold uppercase tracking-wider text-teal-600 mb-3 block">
-              About Us
+              {text(profile.eyebrow, 'About Us')}
             </span>
             <h1 className="text-4xl md:text-5xl font-bold text-navy-900 leading-tight mb-6">
-              Scientific Writing, Editing & Publication Support
+              {text(profile.heading, 'Scientific Writing, Editing & Publication Support')}
             </h1>
             <p className="text-lg text-navy-500 leading-relaxed">
               {text(profile.description, settings?.about_intro || 'SciScript Global Scientific Writing Services is a professional scientific writing and research communication practice supporting biomedical, pharmaceutical, and interdisciplinary research.')}
@@ -101,14 +110,14 @@ export default function About() {
             transition={{ duration: 0.5 }}
             className="prose-scientific"
           >
-            <h2>Our Approach</h2>
+            <h2>{text(approach.heading, 'Our Approach')}</h2>
             <p className="text-lg text-navy-500 leading-relaxed mb-6">
-              {text(profile.approach, settings?.about_body || 'We provide evidence-based scientific writing, manuscript development, literature review, scientific editing, citation verification, scientific figure design, and publication support across research articles, review articles, books and book chapters, theses and dissertations, scientific tables, graphical abstracts, molecular mechanism figures, and journal submission documents.')}
+              {text(approach.description || profile.approach, settings?.about_body || 'We provide evidence-based scientific writing, manuscript development, literature review, scientific editing, citation verification, scientific figure design, and publication support across research articles, review articles, books and book chapters, theses and dissertations, scientific tables, graphical abstracts, molecular mechanism figures, and journal submission documents.')}
             </p>
 
-            <h2>Our Mission</h2>
+            <h2>{text(mission.heading, 'Our Mission')}</h2>
             <p className="text-lg text-navy-500 leading-relaxed mb-6">
-              {text(profile.mission, settings?.about_mission || 'To support researchers and institutions in communicating science with accuracy, integrity, and clarity — adhering to ethical, evidence-based publishing standards.')}
+              {text(mission.description || profile.mission, settings?.about_mission || 'To support researchers and institutions in communicating science with accuracy, integrity, and clarity — adhering to ethical, evidence-based publishing standards.')}
             </p>
           </motion.div>
         </div>
@@ -117,16 +126,20 @@ export default function About() {
       <section className="py-20 lg:py-28 bg-offwhite">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <img src={profileImage} alt={text(profile.image_alt, 'SciScript founder and scientific writing professional')} className="w-full max-h-[34rem] object-cover rounded-2xl border border-navy-100 shadow-lg" loading="lazy" />
+            <img src={founderImage} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = profileImage; }} alt={text(founder.image_alt, 'SciScript founder and scientific writing professional')} className="w-full max-h-[34rem] object-cover rounded-2xl border border-navy-100 shadow-lg" loading="lazy" />
             <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-teal-600 mb-3 block">Founder / Profile</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-navy-900 leading-tight mb-4">{text(profile.full_name, 'SciScript Global')}</h2>
-              <p className="text-lg text-teal-600 font-medium mb-5">{text(profile.professional_title, 'Scientific Writing & Research Communication')}</p>
-              <p className="text-navy-500 leading-relaxed mb-4">{text(profile.long_bio, text(profile.short_bio, 'Evidence-based scientific writing, editing, and publication support for biomedical and pharmaceutical research.'))}</p>
+              <span className="text-sm font-semibold uppercase tracking-wider text-teal-600 mb-3 block">{text(founder.eyebrow, 'Founder / Profile')}</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-navy-900 leading-tight mb-4">{text(founder.full_name, 'SciScript Global')}</h2>
+              <p className="text-lg text-teal-600 font-medium mb-5">{text(founder.professional_title, 'Scientific Writing & Research Communication')}</p>
+              <p className="text-navy-500 leading-relaxed mb-4">{text(founder.long_bio, text(founder.short_bio, 'Evidence-based scientific writing, editing, and publication support for biomedical and pharmaceutical research.'))}</p>
               <div className="space-y-2 text-sm text-navy-600">
-                {typeof profile.email === 'string' && profile.email && <a className="block hover:text-teal-600" href={`mailto:${profile.email}`}>{profile.email}</a>}
-                {typeof profile.phone === 'string' && profile.phone && <a className="block hover:text-teal-600" href={`tel:${profile.phone}`}>{profile.phone}</a>}
-                {typeof profile.location === 'string' && profile.location && <p>{profile.location}</p>}
+                {typeof founder.email === 'string' && founder.email && <a className="block hover:text-teal-600" href={`mailto:${founder.email}`}>{founder.email}</a>}
+                {typeof founder.phone === 'string' && founder.phone && <a className="block hover:text-teal-600" href={`tel:${founder.phone}`}>{founder.phone}</a>}
+                {typeof founder.location === 'string' && founder.location && <p>{founder.location}</p>}
+                {typeof founder.linkedin === 'string' && founder.linkedin && <a className="block hover:text-teal-600" href={founder.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
+                {typeof founder.orcid === 'string' && founder.orcid && <a className="block hover:text-teal-600" href={founder.orcid} target="_blank" rel="noreferrer">ORCID</a>}
+                {typeof founder.google_scholar === 'string' && founder.google_scholar && <a className="block hover:text-teal-600" href={founder.google_scholar} target="_blank" rel="noreferrer">Google Scholar</a>}
+                {typeof founder.website === 'string' && founder.website && <a className="block hover:text-teal-600" href={founder.website} target="_blank" rel="noreferrer">Website</a>}
               </div>
             </div>
           </div>
@@ -138,14 +151,14 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             eyebrow="Our Principles"
-            title="Evidence-Based. Ethical. Author-Centered."
-            subtitle="The values that guide every manuscript, review, and figure we work on."
+            title={text(principlesSection.heading, 'Evidence-Based. Ethical. Author-Centered.')}
+            subtitle={text(principlesSection.subtitle, 'The values that guide every manuscript, review, and figure we work on.')}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {dynamicPrinciples.map((item, i) => {
               const p = typeof item === 'object' && item !== null ? item as Record<string, unknown> : { title: String(item) } as Record<string, unknown>;
               const fallback = principles[i % principles.length];
-              const Icon = fallback.icon;
+              const Icon = getIcon(typeof p.icon === 'string' ? p.icon : null) || fallback.icon;
               return (
               <motion.div
                 key={String(p.title || fallback.title)}
@@ -174,14 +187,14 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             eyebrow="Capabilities"
-            title="What We Do"
-            subtitle="Core capabilities across the scientific research communication lifecycle."
+            title={text(capabilitiesSection.heading, 'What We Do')}
+            subtitle={text(capabilitiesSection.subtitle, 'Core capabilities across the scientific research communication lifecycle.')}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {dynamicCapabilities.map((item, i) => {
               const c = typeof item === 'object' && item !== null ? item as Record<string, unknown> : { title: String(item) } as Record<string, unknown>;
               const fallback = capabilities[i % capabilities.length];
-              const Icon = fallback.icon;
+              const Icon = getIcon(typeof c.icon === 'string' ? c.icon : null) || fallback.icon;
               return (
               <motion.div
                 key={String(c.title || fallback.title)}
@@ -208,7 +221,8 @@ export default function About() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             eyebrow="Scope of Work"
-            title="Document Types We Support"
+            title={text(workSection.heading, 'Document Types We Support')}
+            subtitle={text(workSection.subtitle, '') || undefined}
             icon={GraduationCap}
           />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -233,12 +247,12 @@ export default function About() {
       </section>
 
       <CTASection
-        title="Let's Discuss Your Research"
-        subtitle="Share your research goals with us and discover how our evidence-based scientific writing and publication support can help."
-        primaryLabel="Request Consultation"
-        primaryTo="/contact"
-        secondaryLabel="View Our Services"
-        secondaryTo="/services"
+        title={text(cta.title, "Let's Discuss Your Research")}
+        subtitle={text(cta.subtitle, 'Share your research goals with us and discover how our evidence-based scientific writing and publication support can help.')}
+        primaryLabel={text(cta.primary_label, 'Request Consultation')}
+        primaryTo={text(cta.primary_to, '/contact')}
+        secondaryLabel={text(cta.secondary_label, 'View Our Services')}
+        secondaryTo={text(cta.secondary_to, '/services')}
       />
     </>
   );

@@ -80,6 +80,8 @@ export default function Services() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {services.map((service, i) => {
                 const Icon = getIcon(service.icon);
+                const image = typeof service.featured_image === 'string' ? service.featured_image : service.featured_image?.url;
+                const imageAlt = service.featured_image && typeof service.featured_image === 'object' ? service.featured_image.alt || service.title : service.title;
                 return (
                   <motion.div
                     key={service.id}
@@ -90,8 +92,10 @@ export default function Services() {
                   >
                     <Link
                       to={`/services/${service.slug}`}
-                      className="group block h-full bg-offwhite rounded-2xl border border-navy-100 p-8 hover:shadow-xl hover:border-teal-200 transition-all duration-300"
+                      className="group block h-full overflow-hidden bg-white rounded-2xl border border-navy-100 shadow-sm hover:shadow-xl hover:border-teal-200 transition-all duration-300"
                     >
+                      {image && <img src={image} alt={imageAlt} className="w-full h-52 object-cover group-hover:scale-[1.02] transition-transform duration-300" loading="lazy" />}
+                      <div className="p-8">
                       <div className="flex items-start gap-5 mb-5">
                         <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-navy-50 group-hover:bg-teal-50 transition-colors flex items-center justify-center">
                           <Icon className="w-7 h-7 text-navy-700 group-hover:text-teal-600 transition-colors" />
@@ -108,6 +112,11 @@ export default function Services() {
                       <p className="text-sm text-navy-500 leading-relaxed mb-5">
                         {service.short_description}
                       </p>
+                      {service.benefits && service.benefits.length > 0 && (
+                        <ul className="space-y-1 mb-5 text-sm text-navy-600">
+                          {service.benefits.slice(0, 3).map((benefit) => <li key={benefit} className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-teal-500 mt-0.5 flex-shrink-0" />{benefit}</li>)}
+                        </ul>
+                      )}
                       {service.deliverables && service.deliverables.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-5">
                           {service.deliverables.slice(0, 4).map((d) => (
@@ -127,6 +136,7 @@ export default function Services() {
                         View Service Details
                         <ArrowRight className="w-4 h-4" />
                       </span>
+                      </div>
                     </Link>
                   </motion.div>
                 );

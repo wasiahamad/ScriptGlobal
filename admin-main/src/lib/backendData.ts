@@ -19,6 +19,7 @@ const resourceByTable: Record<string, string> = {
   admin_profiles: 'admin-users',
   media: 'media',
   page_settings: 'home',
+  blog_posts: 'blog-posts',
 };
 
 function frontendKey(key: string) {
@@ -43,6 +44,7 @@ function frontendKey(key: string) {
     publicId: 'public_id',
     altText: 'alt_text',
     contentType: 'content_type',
+    featuredImage: 'featured_image',
   };
   return keys[key] || key;
 }
@@ -52,7 +54,12 @@ function normalize(value: any): any {
   if (!value || typeof value !== 'object') return value;
   const result: Record<string, any> = {};
   for (const [key, item] of Object.entries(value)) result[frontendKey(key)] = normalize(item);
+  if ('is_active' in result && !('enabled' in result)) result.enabled = result.is_active;
+  if ('type' in result && !('nav_type' in result) && (result.type === 'link' || result.type === 'dropdown')) {
+    result.nav_type = result.type === 'dropdown' ? 'dropdown' : 'internal';
+  }
   if (typeof result.status === 'string' && !('is_published' in result)) result.is_published = result.status === 'published';
+  if (typeof result.status === 'string' && !('published' in result)) result.published = result.status === 'published';
   if ('title' in result && !('name' in result)) result.name = result.title;
   if ('description' in result && !('full_description' in result)) result.full_description = result.description;
   if ('is_featured' in result && !('featured' in result)) result.featured = result.is_featured;
@@ -61,14 +68,122 @@ function normalize(value: any): any {
 
 function backendPayload(table: string, payload: any) {
   const result = { ...((payload?.content && table === 'page_settings' ? payload.content : payload) || {}) };
+  const aliases: Record<string, string> = {
+    name: 'title',
+    short_description: 'shortDescription',
+    detailed_description: 'description',
+    long_description: 'description',
+    featured: 'isFeatured',
+    is_published: 'status',
+    research_type: 'researchType',
+    publication_type: 'publicationType',
+    author_role: 'authorRole',
+    journal_publisher: 'journalPublisher',
+    publication_date: 'publicationDate',
+    featured_image: 'featuredImage',
+    nav_type: 'type',
+    parent_id: 'parentId',
+    display_order: 'displayOrder',
+    enabled: 'isActive',
+    brand_name: 'brandName',
+    website_name: 'siteName',
+    default_language: 'defaultLanguage',
+    primary_color: 'primaryColor',
+    accent_color: 'accentColor',
+    social_links: 'socialLinks',
+    copyright_text: 'copyrightText',
+    navigation_groups: 'navigationGroups',
+    service_links: 'serviceLinks',
+    contact_email: 'contactEmail',
+    contact_phone: 'contactPhone',
+    contact_location: 'contactLocation',
+    cover_image: 'coverImage',
+    external_evidence_url: 'externalEvidenceUrl',
+    publisher_url: 'publisherUrl',
+    pubmed_url: 'pubmedUrl',
+    google_scholar_url: 'googleScholarUrl',
+    pdf_url: 'pdfUrl',
+    evidence_link: 'evidenceLink',
+    scientific_visuals: 'scientificVisuals',
+    related_services: 'relatedServices',
+    related_projects: 'relatedProjects',
+    related_publications: 'relatedPublications',
+    published: 'status',
+    is_active: 'isActive',
+    profile_image: 'profileImage',
+    linkedin_url: 'linkedinUrl',
+    website: 'websiteUrl',
+    testimonial: 'testimonial',
+    question: 'question',
+    answer: 'answer',
+    excerpt: 'excerpt',
+    seo_title: 'seoTitle',
+    meta_description: 'metaDescription',
+    canonical_url: 'canonicalUrl',
+  };
+  for (const [key, backendKey] of Object.entries(aliases)) {
+    if (key in result && !(backendKey in result)) result[backendKey] = result[key];
+  }
+  if (table === 'navigation' && typeof result.nav_type === 'string') {
+    result.type = result.nav_type === 'dropdown' ? 'dropdown' : 'link';
+  }
+  if (typeof result.status === 'boolean') result.status = result.status ? 'published' : 'draft';
+  delete result.name;
+  delete result.short_description;
+  delete result.detailed_description;
+  delete result.long_description;
+  delete result.display_order;
+  delete result.featured;
+  delete result.is_published;
+  delete result.research_type;
+  delete result.publication_type;
+  delete result.author_role;
+  delete result.journal_publisher;
+  delete result.publication_date;
+  delete result.featured_image;
+  delete result.cover_image;
+  delete result.external_evidence_url;
+  delete result.publisher_url;
+  delete result.pubmed_url;
+  delete result.google_scholar_url;
+  delete result.pdf_url;
+  delete result.evidence_link;
+  delete result.scientific_visuals;
+  delete result.related_services;
+  delete result.related_projects;
+  delete result.related_publications;
+  delete result.published;
+  delete result.nav_type;
+  delete result.parent_id;
+  delete result.enabled;
+  delete result.brand_name;
+  delete result.website_name;
+  delete result.default_language;
+  delete result.primary_color;
+  delete result.accent_color;
+  delete result.social_links;
+  delete result.copyright_text;
+  delete result.navigation_groups;
+  delete result.service_links;
+  delete result.contact_email;
+  delete result.contact_phone;
+  delete result.contact_location;
   if (table === 'services') {
     if (result.name && !result.title) result.title = result.name;
     if (result.full_description && !result.description) result.description = result.full_description;
     if ('featured' in result && !('isFeatured' in result)) result.isFeatured = result.featured;
+    if (result.cta_text || result.cta_url) result.cta = { text: result.cta_text || '', url: result.cta_url || '' };
+    if ('featured_image' in result && !('featuredImage' in result)) result.featuredImage = result.featured_image;
   }
   if ('short_description' in result && !('shortDescription' in result)) result.shortDescription = result.short_description;
   if ('display_order' in result && !('displayOrder' in result)) result.displayOrder = result.display_order;
   if ('is_published' in result && !('status' in result)) result.status = result.is_published ? 'published' : 'draft';
+  if (result.status === 'published' && !('isActive' in result)) result.isActive = true;
+  if (['navigation', 'footer_settings', 'global_settings'].includes(table)) {
+    result.status = 'published';
+    if (!('isActive' in result)) result.isActive = true;
+  }
+  if (result.seo && typeof result.seo === 'object' && !Array.isArray(result.seo) && Object.keys(result.seo).length === 0) delete result.seo;
   return result;
 }
 

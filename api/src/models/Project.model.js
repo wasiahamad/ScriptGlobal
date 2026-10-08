@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { createContentModel, objectIdArray, objectIdRef } from "./_createContentModel.js";
 export default createContentModel("Project", "projects", {
     projectType: String,
@@ -10,7 +11,7 @@ export default createContentModel("Project", "projects", {
     workflow: [Object],
     deliverables: [String],
     outcome: String,
-    featuredImage: objectIdRef("Media"),
+    featuredImage: { type: mongoose.Schema.Types.Mixed, default: null },
     gallery: objectIdArray("Media"),
     scientificVisuals: objectIdArray("ScientificVisual"),
     references: [Object],
@@ -18,5 +19,5 @@ export default createContentModel("Project", "projects", {
     relatedServices: objectIdArray("Service"),
     relatedExpertise: objectIdArray("Expertise"),
     relatedPublications: objectIdArray("Publication"),
-    seo: objectIdRef("SEO"),
+    seo: { type: Object, default: {} },
 });

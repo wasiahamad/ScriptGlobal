@@ -36,10 +36,20 @@ export const env = {
   cookieName: process.env.COOKIE_NAME || "sciscript_admin_token",
   publicSiteUrl: process.env.PUBLIC_SITE_URL || "http://localhost:5173",
   adminSiteUrl: process.env.ADMIN_SITE_URL || "http://localhost:5174",
+  email: {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: process.env.SMTP_SECURE === "true",
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+    from: process.env.MAIL_FROM || process.env.SMTP_USER,
+    notifyTo: process.env.CONTACT_NOTIFICATION_EMAIL || process.env.SMTP_USER,
+  },
   uploadDir: process.env.UPLOAD_DIR || "uploads",
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,
     apiSecret: process.env.CLOUDINARY_API_SECRET,
+    uploadPrefix: process.env.CLOUDINARY_UPLOAD_PREFIX || "https://api-eu.cloudinary.com",
   },
 };

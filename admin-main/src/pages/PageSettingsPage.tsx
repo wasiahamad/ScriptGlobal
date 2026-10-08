@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { PageSettings } from '@/lib/types';
 import { PageHeader } from '@/components/ui';
 import { FormSection, Field, CharCounter, StringListEditor, ImageUploadField } from '@/components/Form';
@@ -21,6 +21,7 @@ const pageTitles: Record<string, string> = {
 };
 
 export default function PageSettingsPage() {
+  const supabase = createBackendDataClient();
   const { pageKey = 'home' } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -32,14 +33,34 @@ export default function PageSettingsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    if (pageKey === 'home') {
+    if (pageKey === 'home' || pageKey === 'about' || pageKey === 'founder' || pageKey === 'publication-support') {
       try {
-        const data = await apiRequest<Record<string, unknown>>('/api/v1/admin/home');
-        setPage({ id: String(data._id || data.id || 'home'), page_key: 'home', title: 'Home Page', content: {}, seo: {}, created_at: '', updated_at: '' });
-        setContent((data.data as Record<string, unknown>) || {});
+        const resource = pageKey === 'home'
+          ? 'home'
+          : pageKey === 'publication-support'
+            ? 'publication-support'
+            : 'profile';
+        const data = await apiRequest<Record<string, unknown>>(`/api/v1/admin/${resource}`);
+        setPage({ id: String(data._id || data.id || pageKey), page_key: pageKey, title: pageTitles[pageKey] || pageKey, content: {}, seo: {}, created_at: '', updated_at: '' });
+        const metadataKeys = new Set([
+          '_id', 'id', 'status', 'isActive', 'isDeleted', 'contentType', 'createdAt',
+          'updatedAt', 'createdBy', 'updatedBy', 'publishedAt', 'displayOrder', 'slug', 'data',
+        ]);
+        const directContent = Object.fromEntries(
+          Object.entries(data).filter(([key]) => !metadataKeys.has(key)),
+        );
+        const loaded = {
+          ...directContent,
+          ...((data.data as Record<string, unknown>) || {}),
+        };
+        if (pageKey === 'founder' && !loaded.founder) {
+          setContent({ ...loaded, founder: loaded });
+        } else {
+          setContent(loaded);
+        }
       } catch {
-        setPage(null);
-        setContent({});
+        setPage({ id: pageKey, page_key: pageKey, title: pageTitles[pageKey] || pageKey, content: {}, seo: {}, created_at: '', updated_at: '' });
+        setContent(pageKey === 'founder' ? { founder: {} } : {});
       }
     } else {
       const { data } = await supabase.from('page_settings').select('*').eq('page_key', pageKey).maybeSingle();
@@ -58,15 +79,20 @@ export default function PageSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    if (pageKey === 'home') {
+    if (pageKey === 'home' || pageKey === 'about' || pageKey === 'founder' || pageKey === 'publication-support') {
       try {
-        await apiRequest('/api/v1/admin/home', {
+        const resource = pageKey === 'home'
+          ? 'home'
+          : pageKey === 'publication-support'
+            ? 'publication-support'
+            : 'profile';
+        await apiRequest(`/api/v1/admin/${resource}`, {
           method: 'PUT',
           body: JSON.stringify({ status: 'published', isActive: true, data: content }),
         });
-        toast('Home page changes saved successfully');
+        toast(`${pageTitles[pageKey] || pageKey} changes saved successfully`);
       } catch (error) {
-        toast(error instanceof Error ? error.message : 'Unable to save Home page', 'error');
+        toast(error instanceof Error ? error.message : `Unable to save ${pageTitles[pageKey] || pageKey}`, 'error');
       }
     } else if (page) {
       const { error } = await supabase.from('page_settings').update({ content }).eq('id', page.id);
@@ -124,7 +150,8 @@ function HomeEditor({ content, update }: EditorProps) {
   const finalCta = (content.final_cta || {}) as Record<string, unknown>;
   const trustSignals = (content.trust_signals || []) as string[];
   const expertiseItems = (content.expertise_items || []) as Record<string, unknown>[];
-  const workCovers = (about.work_covers || []) as string[];
+  const missionText = typeof about.mission === 'string' ? about.mission : '';
+  const workCovers = ((about.work_covers || []) as string[]).filter((item) => !/^our mission\s*:/i.test(item.trim()) && item.trim() !== missionText.trim());
 
   return (
     <div className="space-y-4">
@@ -211,6 +238,13 @@ function HomeEditor({ content, update }: EditorProps) {
 
 function AboutEditor({ content, update }: EditorProps) {
   const profile = (content.profile || {}) as Record<string, unknown>;
+  const approach = (content.approach || {}) as Record<string, unknown>;
+  const mission = (content.mission || {}) as Record<string, unknown>;
+  const founder = (content.founder || {}) as Record<string, unknown>;
+  const principlesSection = (content.principles_section || {}) as Record<string, unknown>;
+  const capabilitiesSection = (content.capabilities_section || {}) as Record<string, unknown>;
+  const workSection = (content.work_section || {}) as Record<string, unknown>;
+  const cta = (content.cta || {}) as Record<string, unknown>;
   const focus = (content.focus || {}) as Record<string, unknown>;
   const contributions = (content.contributions || []) as Record<string, unknown>[];
   const principles = (content.principles || []) as Record<string, unknown>[];
@@ -219,9 +253,51 @@ function AboutEditor({ content, update }: EditorProps) {
 
   return (
     <div className="space-y-4">
-      <FormSection title="Professional Profile">
-        <Field label="Heading"><input value={(profile.heading as string) || ''} onChange={(e) => update('profile', { ...profile, heading: e.target.value })} className="input" /></Field>
+      <FormSection title="About Hero Section">
+        <Field label="Eyebrow"><input value={(profile.eyebrow as string) || ''} onChange={(e) => update('profile', { ...profile, eyebrow: e.target.value })} className="input" placeholder="About Us" /></Field>
+        <Field label="Main Heading"><input value={(profile.heading as string) || ''} onChange={(e) => update('profile', { ...profile, heading: e.target.value })} className="input" /></Field>
         <Field label="Description"><textarea value={(profile.description as string) || ''} onChange={(e) => update('profile', { ...profile, description: e.target.value })} className="input min-h-[120px]" /></Field>
+      </FormSection>
+      <FormSection title="Approach & Mission">
+        <Field label="Approach Heading"><input value={(approach.heading as string) || ''} onChange={(e) => update('approach', { ...approach, heading: e.target.value })} className="input" placeholder="Our Approach" /></Field>
+        <Field label="Approach Description"><textarea value={(approach.description as string) || ''} onChange={(e) => update('approach', { ...approach, description: e.target.value })} className="input min-h-[100px]" /></Field>
+        <Field label="Mission Heading"><input value={(mission.heading as string) || ''} onChange={(e) => update('mission', { ...mission, heading: e.target.value })} className="input" placeholder="Our Mission" /></Field>
+        <Field label="Mission Description"><textarea value={(mission.description as string) || ''} onChange={(e) => update('mission', { ...mission, description: e.target.value })} className="input min-h-[100px]" /></Field>
+      </FormSection>
+      <FormSection title="Founder / Profile Section">
+        <Field label="Eyebrow"><input value={(founder.eyebrow as string) || ''} onChange={(e) => update('founder', { ...founder, eyebrow: e.target.value })} className="input" placeholder="Founder / Profile" /></Field>
+        <Field label="Name"><input value={(founder.full_name as string) || ''} onChange={(e) => update('founder', { ...founder, full_name: e.target.value })} className="input" /></Field>
+        <Field label="Professional Title"><input value={(founder.professional_title as string) || ''} onChange={(e) => update('founder', { ...founder, professional_title: e.target.value })} className="input" /></Field>
+        <Field label="Biography"><textarea value={(founder.long_bio as string) || ''} onChange={(e) => update('founder', { ...founder, long_bio: e.target.value })} className="input min-h-[100px]" /></Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Email"><input value={(founder.email as string) || ''} onChange={(e) => update('founder', { ...founder, email: e.target.value })} className="input" /></Field>
+          <Field label="Phone"><input value={(founder.phone as string) || ''} onChange={(e) => update('founder', { ...founder, phone: e.target.value })} className="input" /></Field>
+        </div>
+        <Field label="Location"><input value={(founder.location as string) || ''} onChange={(e) => update('founder', { ...founder, location: e.target.value })} className="input" /></Field>
+        <ImageUploadField label="Profile Image" category="About" value={founder.image_url as string} onChange={(url) => update('founder', { ...founder, image_url: url })} />
+        <Field label="Image Alt Text"><input value={(founder.image_alt as string) || ''} onChange={(e) => update('founder', { ...founder, image_alt: e.target.value })} className="input" /></Field>
+      </FormSection>
+      <FormSection title="Principles Section">
+        <Field label="Heading"><input value={(principlesSection.heading as string) || ''} onChange={(e) => update('principles_section', { ...principlesSection, heading: e.target.value })} className="input" placeholder="Evidence-Based. Ethical. Author-Centered." /></Field>
+        <Field label="Subtitle"><textarea value={(principlesSection.subtitle as string) || ''} onChange={(e) => update('principles_section', { ...principlesSection, subtitle: e.target.value })} className="input min-h-[70px]" /></Field>
+      </FormSection>
+      <FormSection title="Capabilities Section">
+        <Field label="Heading"><input value={(capabilitiesSection.heading as string) || ''} onChange={(e) => update('capabilities_section', { ...capabilitiesSection, heading: e.target.value })} className="input" placeholder="What We Do" /></Field>
+        <Field label="Subtitle"><textarea value={(capabilitiesSection.subtitle as string) || ''} onChange={(e) => update('capabilities_section', { ...capabilitiesSection, subtitle: e.target.value })} className="input min-h-[70px]" /></Field>
+      </FormSection>
+      <FormSection title="Scope of Work Section">
+        <Field label="Heading"><input value={(workSection.heading as string) || ''} onChange={(e) => update('work_section', { ...workSection, heading: e.target.value })} className="input" placeholder="Document Types We Support" /></Field>
+        <Field label="Subtitle"><textarea value={(workSection.subtitle as string) || ''} onChange={(e) => update('work_section', { ...workSection, subtitle: e.target.value })} className="input min-h-[70px]" /></Field>
+      </FormSection>
+      <FormSection title="Call to Action Section">
+        <Field label="Heading"><input value={(cta.title as string) || ''} onChange={(e) => update('cta', { ...cta, title: e.target.value })} className="input" /></Field>
+        <Field label="Description"><textarea value={(cta.subtitle as string) || ''} onChange={(e) => update('cta', { ...cta, subtitle: e.target.value })} className="input min-h-[80px]" /></Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Primary Button Text"><input value={(cta.primary_label as string) || ''} onChange={(e) => update('cta', { ...cta, primary_label: e.target.value })} className="input" /></Field>
+          <Field label="Primary Button URL"><input value={(cta.primary_to as string) || ''} onChange={(e) => update('cta', { ...cta, primary_to: e.target.value })} className="input" /></Field>
+          <Field label="Secondary Button Text"><input value={(cta.secondary_label as string) || ''} onChange={(e) => update('cta', { ...cta, secondary_label: e.target.value })} className="input" /></Field>
+          <Field label="Secondary Button URL"><input value={(cta.secondary_to as string) || ''} onChange={(e) => update('cta', { ...cta, secondary_to: e.target.value })} className="input" /></Field>
+        </div>
       </FormSection>
       <FormSection title="Professional Focus">
         <Field label="Heading"><input value={(focus.heading as string) || ''} onChange={(e) => update('focus', { ...focus, heading: e.target.value })} className="input" /></Field>
@@ -280,34 +356,36 @@ function AboutEditor({ content, update }: EditorProps) {
 }
 
 function FounderEditor({ content, update }: EditorProps) {
-  const f = content;
+  const f = (content.founder || content) as Record<string, unknown>;
+  const updateFounder = (key: string, value: unknown) => update('founder', { ...f, [key]: value });
   return (
     <div className="space-y-4">
       <FormSection title="Personal Information">
+        <Field label="Eyebrow"><input value={(f.eyebrow as string) || ''} onChange={(e) => updateFounder('eyebrow', e.target.value)} className="input" placeholder="Founder / Profile" /></Field>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Full Name"><input value={(f.full_name as string) || ''} onChange={(e) => update('full_name', e.target.value)} className="input" placeholder="Dr. Jane Doe" /></Field>
-          <Field label="Professional Title"><input value={(f.professional_title as string) || ''} onChange={(e) => update('professional_title', e.target.value)} className="input" placeholder="Scientific Writer & Editor" /></Field>
+          <Field label="Full Name"><input value={(f.full_name as string) || ''} onChange={(e) => updateFounder('full_name', e.target.value)} className="input" placeholder="Dr. Jane Doe" /></Field>
+          <Field label="Professional Title"><input value={(f.professional_title as string) || ''} onChange={(e) => updateFounder('professional_title', e.target.value)} className="input" placeholder="Scientific Writer & Editor" /></Field>
         </div>
-        <Field label="Short Bio"><textarea value={(f.short_bio as string) || ''} onChange={(e) => update('short_bio', e.target.value)} className="input min-h-[80px]" /></Field>
-        <Field label="Long Biography"><textarea value={(f.long_bio as string) || ''} onChange={(e) => update('long_bio', e.target.value)} className="input min-h-[160px]" /></Field>
-        <ImageUploadField label="Founder profile image" category="Profile" value={f.image_url as string} onChange={(url) => update('image_url', url)} />
-        <Field label="Profile image alt text"><input value={(f.image_alt as string) || ''} onChange={(e) => update('image_alt', e.target.value)} className="input" /></Field>
+        <Field label="Short Bio"><textarea value={(f.short_bio as string) || ''} onChange={(e) => updateFounder('short_bio', e.target.value)} className="input min-h-[80px]" /></Field>
+        <Field label="Long Biography"><textarea value={(f.long_bio as string) || ''} onChange={(e) => updateFounder('long_bio', e.target.value)} className="input min-h-[160px]" /></Field>
+        <ImageUploadField label="Founder profile image" category="Profile" value={f.image_url as string} onChange={(url) => updateFounder('image_url', url)} />
+        <Field label="Profile image alt text"><input value={(f.image_alt as string) || ''} onChange={(e) => updateFounder('image_alt', e.target.value)} className="input" /></Field>
       </FormSection>
       <FormSection title="Contact Information" description="These values populate the contact page, footer, and structured data. Do not hardcode in frontend.">
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Location"><input value={(f.location as string) || ''} onChange={(e) => update('location', e.target.value)} className="input" placeholder="City, Country" /></Field>
-          <Field label="Phone"><input value={(f.phone as string) || ''} onChange={(e) => update('phone', e.target.value)} className="input" placeholder="+1..." /></Field>
+          <Field label="Location"><input value={(f.location as string) || ''} onChange={(e) => updateFounder('location', e.target.value)} className="input" placeholder="City, Country" /></Field>
+          <Field label="Phone"><input value={(f.phone as string) || ''} onChange={(e) => updateFounder('phone', e.target.value)} className="input" placeholder="+1..." /></Field>
         </div>
-        <Field label="Email"><input value={(f.email as string) || ''} onChange={(e) => update('email', e.target.value)} className="input" placeholder="contact@example.com" /></Field>
+        <Field label="Email"><input value={(f.email as string) || ''} onChange={(e) => updateFounder('email', e.target.value)} className="input" placeholder="contact@example.com" /></Field>
       </FormSection>
       <FormSection title="Professional Links">
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="LinkedIn"><input value={(f.linkedin as string) || ''} onChange={(e) => update('linkedin', e.target.value)} className="input" placeholder="https://linkedin.com/in/..." /></Field>
-          <Field label="ORCID"><input value={(f.orcid as string) || ''} onChange={(e) => update('orcid', e.target.value)} className="input" placeholder="https://orcid.org/..." /></Field>
+          <Field label="LinkedIn"><input value={(f.linkedin as string) || ''} onChange={(e) => updateFounder('linkedin', e.target.value)} className="input" placeholder="https://linkedin.com/in/..." /></Field>
+          <Field label="ORCID"><input value={(f.orcid as string) || ''} onChange={(e) => updateFounder('orcid', e.target.value)} className="input" placeholder="https://orcid.org/..." /></Field>
         </div>
         <div className="grid sm:grid-cols-2 gap-4 mt-4">
-          <Field label="Google Scholar"><input value={(f.google_scholar as string) || ''} onChange={(e) => update('google_scholar', e.target.value)} className="input" placeholder="https://scholar.google.com/..." /></Field>
-          <Field label="Website"><input value={(f.website as string) || ''} onChange={(e) => update('website', e.target.value)} className="input" placeholder="https://..." /></Field>
+          <Field label="Google Scholar"><input value={(f.google_scholar as string) || ''} onChange={(e) => updateFounder('google_scholar', e.target.value)} className="input" placeholder="https://scholar.google.com/..." /></Field>
+          <Field label="Website"><input value={(f.website as string) || ''} onChange={(e) => updateFounder('website', e.target.value)} className="input" placeholder="https://..." /></Field>
         </div>
       </FormSection>
     </div>
@@ -370,19 +448,72 @@ function EditingEditor({ content, update }: EditorProps) {
 
 function PublicationSupportEditor({ content, update }: EditorProps) {
   const t = content;
-  const steps = (t.steps || []) as string[];
+  const steps = (Array.isArray(t.steps) ? t.steps : []).map((step) =>
+    typeof step === 'object' && step !== null
+      ? step as Record<string, unknown>
+      : { title: String(step || ''), description: '' },
+  );
+  const cta = (t.cta || {}) as Record<string, unknown>;
   return (
     <div className="space-y-4">
       <FormSection title="Page Content">
-        <Field label="Page Content"><textarea value={(t.page_content as string) || ''} onChange={(e) => update('page_content', e.target.value)} className="input min-h-[120px]" /></Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Hero Eyebrow"><input value={(t.eyebrow as string) || ''} onChange={(e) => update('eyebrow', e.target.value)} className="input" placeholder="Publication Support" /></Field>
+          <Field label="Heading"><input value={(t.heading as string) || ''} onChange={(e) => update('heading', e.target.value)} className="input" /></Field>
+          <Field label="Breadcrumb Home Label"><input value={(t.breadcrumb_home_label as string) || ''} onChange={(e) => update('breadcrumb_home_label', e.target.value)} className="input" placeholder="Home" /></Field>
+          <Field label="Breadcrumb Label"><input value={(t.breadcrumb_label as string) || ''} onChange={(e) => update('breadcrumb_label', e.target.value)} className="input" placeholder="Publication Support" /></Field>
+          <Field label="SEO Title"><input value={(t.seo_title as string) || ''} onChange={(e) => update('seo_title', e.target.value)} className="input" /></Field>
+        </div>
+        <Field label="SEO Description"><textarea value={(t.seo_description as string) || ''} onChange={(e) => update('seo_description', e.target.value)} className="input min-h-[80px]" /></Field>
+        <Field label="Hero Description"><textarea value={(t.page_content as string) || ''} onChange={(e) => update('page_content', e.target.value)} className="input min-h-[120px]" /></Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Process Eyebrow"><input value={(t.process_eyebrow as string) || ''} onChange={(e) => update('process_eyebrow', e.target.value)} className="input" /></Field>
+          <Field label="Process Heading"><input value={(t.process_heading as string) || ''} onChange={(e) => update('process_heading', e.target.value)} className="input" /></Field>
+        </div>
+        <Field label="Process Description"><textarea value={(t.process_description as string) || ''} onChange={(e) => update('process_description', e.target.value)} className="input min-h-[80px]" /></Field>
       </FormSection>
-      <FormSection title="Service Steps" description="e.g. 1. Manuscript Review, 2. Structure & Language, 3. References, 4. Figures & Tables, 5. Journal Formatting, 6. Submission Readiness">
-        <StringListEditor value={steps} onChange={(v) => update('steps', v)} placeholder="Service step..." />
+      <FormSection title="Service Steps" description="Manage the title and description shown in each publication support step.">
+        <div className="space-y-3">
+          {steps.map((step, index) => (
+            <div key={index} className="grid sm:grid-cols-[150px_1fr_1fr_auto] gap-2 items-start">
+              <select value={(step.icon as string) || 'file-text'} onChange={(e) => { const next = [...steps]; next[index] = { ...step, icon: e.target.value }; update('steps', next); }} className="input">
+                <option value="file-text">File</option>
+                <option value="book-open">Book</option>
+                <option value="check-circle">Check</option>
+                <option value="send">Send</option>
+              </select>
+              <input value={(step.title as string) || ''} onChange={(e) => { const next = [...steps]; next[index] = { ...step, title: e.target.value }; update('steps', next); }} className="input" placeholder="Step title" />
+              <input value={(step.description as string) || ''} onChange={(e) => { const next = [...steps]; next[index] = { ...step, description: e.target.value }; update('steps', next); }} className="input" placeholder="Step description" />
+              <button onClick={() => update('steps', steps.filter((_, i) => i !== index))} className="btn btn-ghost text-red-400">Remove</button>
+            </div>
+          ))}
+          <button onClick={() => update('steps', [...steps, { icon: 'file-text', title: '', description: '' }])} className="btn btn-secondary">+ Add Step</button>
+        </div>
+      </FormSection>
+      <FormSection title="Research Outputs Section">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Eyebrow"><input value={(t.publications_eyebrow as string) || ''} onChange={(e) => update('publications_eyebrow', e.target.value)} className="input" /></Field>
+          <Field label="Heading"><input value={(t.publications_heading as string) || ''} onChange={(e) => update('publications_heading', e.target.value)} className="input" /></Field>
+        </div>
+        <Field label="Description"><textarea value={(t.publications_description as string) || ''} onChange={(e) => update('publications_description', e.target.value)} className="input min-h-[70px]" /></Field>
+        <Field label="DOI Link Label"><input value={(t.doi_label as string) || ''} onChange={(e) => update('doi_label', e.target.value)} className="input" placeholder="DOI" /></Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Empty State Title"><input value={(t.empty_title as string) || ''} onChange={(e) => update('empty_title', e.target.value)} className="input" /></Field>
+          <Field label="Empty State Description"><input value={(t.empty_description as string) || ''} onChange={(e) => update('empty_description', e.target.value)} className="input" /></Field>
+        </div>
       </FormSection>
       <FormSection title="Call to Action">
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="CTA Text"><input value={((t.cta as Record<string, unknown>)?.text as string) || ''} onChange={(e) => update('cta', { ...(t.cta as Record<string, unknown> || {}), text: e.target.value })} className="input" /></Field>
-          <Field label="CTA URL"><input value={((t.cta as Record<string, unknown>)?.url as string) || ''} onChange={(e) => update('cta', { ...(t.cta as Record<string, unknown> || {}), url: e.target.value })} className="input" /></Field>
+          <Field label="CTA Title"><input value={(t.cta_title as string) || ''} onChange={(e) => update('cta_title', e.target.value)} className="input" /></Field>
+          <Field label="CTA Description"><textarea value={(t.cta_description as string) || ''} onChange={(e) => update('cta_description', e.target.value)} className="input min-h-[70px]" /></Field>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4 mt-4">
+          <Field label="Primary CTA Text"><input value={(cta.text as string) || ''} onChange={(e) => update('cta', { ...cta, text: e.target.value })} className="input" /></Field>
+          <Field label="Primary CTA URL"><input value={(cta.url as string) || ''} onChange={(e) => update('cta', { ...cta, url: e.target.value })} className="input" /></Field>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4 mt-4">
+          <Field label="Secondary CTA Text"><input value={(t.secondary_cta_text as string) || ''} onChange={(e) => update('secondary_cta_text', e.target.value)} className="input" /></Field>
+          <Field label="Secondary CTA URL"><input value={(t.secondary_cta_url as string) || ''} onChange={(e) => update('secondary_cta_url', e.target.value)} className="input" /></Field>
         </div>
       </FormSection>
     </div>

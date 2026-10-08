@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, Briefcase, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { Service } from '@/lib/types';
 import { PageHeader, StatusBadge, EmptyState } from '@/components/ui';
 import { DataTable, type Column } from '@/components/DataTable';
 import { ConfirmDialog, Modal } from '@/components/Modal';
-import { FormSection, Field, CharCounter, StringListEditor } from '@/components/Form';
+import { FormSection, Field, CharCounter, StringListEditor, ImageUploadField } from '@/components/Form';
 import { useToast } from '@/lib/toast';
 import { useActivityLog } from '@/lib/useActivityLog';
 import { slugify } from '@/lib/utils';
@@ -43,7 +43,7 @@ export default function ServicesPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await createBackendDataClient()
       .from('services')
       .select('*')
       .order('display_order', { ascending: true });
@@ -80,14 +80,14 @@ export default function ServicesPage() {
     };
 
     if (editing.id) {
-      const { error } = await supabase.from('services').update(payload).eq('id', editing.id);
+      const { error } = await createBackendDataClient().from('services').update(payload).eq('id', editing.id);
       if (error) toast(error.message, 'error');
       else {
         toast('Service updated successfully');
         await logActivity('Updated Service', 'service', editing.id);
       }
     } else {
-      const { data, error } = await supabase.from('services').insert(payload).select().single();
+      const { data, error } = await createBackendDataClient().from('services').insert(payload).select().single();
       if (error) toast(error.message, 'error');
       else {
         toast('Service created successfully');
@@ -103,7 +103,7 @@ export default function ServicesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
-    const { error } = await supabase.from('services').delete().eq('id', deleteId);
+    const { error } = await createBackendDataClient().from('services').delete().eq('id', deleteId);
     if (error) toast(error.message, 'error');
     else {
       toast('Service deleted');
@@ -116,7 +116,7 @@ export default function ServicesPage() {
 
   const handleDuplicate = async (row: Service) => {
     const { id, created_at, updated_at, ...rest } = row;
-    const { data, error } = await supabase
+    const { data, error } = await createBackendDataClient()
       .from('services')
       .insert({ ...rest, name: `${row.name} (Copy)`, slug: `${row.slug}-copy`, status: 'draft' })
       .select()
@@ -268,6 +268,12 @@ export default function ServicesPage() {
                   placeholder="flask-conical"
                 />
               </Field>
+              <ImageUploadField
+                label="Featured Image"
+                category="Services"
+                value={typeof editing.featured_image === 'object' && editing.featured_image ? editing.featured_image.url : null}
+                onChange={(url) => setEditing({ ...editing, featured_image: { url, alt: editing.name || 'Service image' } })}
+              />
             </FormSection>
 
             <FormSection title="Content">

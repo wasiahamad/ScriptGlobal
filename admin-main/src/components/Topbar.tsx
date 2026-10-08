@@ -7,6 +7,7 @@ import { useTheme } from '@/lib/theme';
 import { useToast } from '@/lib/toast';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { apiRequest } from '@/lib/apiClient';
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -22,6 +23,8 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<{ type: string; label: string; id: string }[]>([]);
+  const [inquiries, setInquiries] = useState<{ _id: string; name: string; projectDescription: string; createdAt: string; status: string }[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +40,19 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadNotifications = async () => {
+      try {
+        const data = await apiRequest<typeof inquiries>('/api/v1/admin/contact-inquiries');
+        if (active) setInquiries(data.filter((item) => item.status === 'new').slice(0, 5));
+      } catch { /* authentication/loading errors are handled by the page */ }
+    };
+    loadNotifications();
+    const timer = window.setInterval(loadNotifications, 30000);
+    return () => { active = false; window.clearInterval(timer); };
   }, []);
 
   useEffect(() => {
@@ -109,10 +125,18 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         >
           {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
-        <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors relative">
+        <button onClick={() => setShowNotifications(!showNotifications)} className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors relative">
           <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-teal-500" />
+          {inquiries.length > 0 && <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-[10px] text-white">{inquiries.length}</span>}
         </button>
+        <AnimatePresence>
+          {showNotifications && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="absolute right-20 top-14 z-40 w-80 card p-3 shadow-xl">
+              <div className="flex items-center justify-between mb-2"><p className="font-medium text-white">New contact inquiries</p><button onClick={() => navigate('/contact-inquiries')} className="text-xs text-teal-400">View all</button></div>
+              {inquiries.length ? inquiries.map((item) => <button key={item._id} onClick={() => navigate('/contact-inquiries')} className="block w-full text-left border-t border-slate-800 py-2"><p className="text-sm text-slate-200">{item.name}</p><p className="text-xs text-slate-500 truncate">{item.projectDescription}</p></button>) : <p className="text-sm text-slate-500 py-3">No new inquiries.</p>}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div ref={profileRef} className="relative">
           <button

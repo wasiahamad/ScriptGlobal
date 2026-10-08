@@ -10,5 +10,5 @@ export default createContentModel("ScientificVisual", "scientific-visuals", {
     relatedResearch: objectIdRef("Research"),
     relatedPublication: objectIdRef("Publication"),
     relatedExpertise: objectIdRef("Expertise"),
-    seo: objectIdRef("SEO"),
+    seo: { type: Object, default: {} },
 });

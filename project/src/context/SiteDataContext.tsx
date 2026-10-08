@@ -29,6 +29,13 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!settings) return;
+    if (settings.brand_name) document.title = settings.brand_name;
+    document.documentElement.style.setProperty('--site-primary-color', settings.primary_color || '#0f766e');
+    document.documentElement.style.setProperty('--site-accent-color', settings.accent_color || '#14b8a6');
+  }, [settings]);
+
   return (
     <SiteDataContext.Provider value={{ settings, loading, refresh: load }}>
       {children}

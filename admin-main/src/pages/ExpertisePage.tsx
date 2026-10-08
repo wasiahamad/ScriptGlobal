@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, GraduationCap, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { Expertise } from '@/lib/types';
 import { PageHeader, StatusBadge, EmptyState } from '@/components/ui';
 import { DataTable, type Column } from '@/components/DataTable';
 import { ConfirmDialog, Modal } from '@/components/Modal';
-import { FormSection, Field, CharCounter } from '@/components/Form';
+import { FormSection, Field, CharCounter, ImageUploadField } from '@/components/Form';
 import { useToast } from '@/lib/toast';
 import { useActivityLog } from '@/lib/useActivityLog';
 import { slugify } from '@/lib/utils';
@@ -17,6 +17,7 @@ const emptyItem: Partial<Expertise> = {
 };
 
 export default function ExpertisePage() {
+  const supabase = createBackendDataClient();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
   const [items, setItems] = useState<Expertise[]>([]);
@@ -91,6 +92,12 @@ export default function ExpertisePage() {
               <Field label="Short Description"><input value={editing.short_description || ''} onChange={(e) => setEditing({ ...editing, short_description: e.target.value })} className="input" placeholder="Brief description..." /><CharCounter value={editing.short_description || ''} max={150} /></Field>
               <Field label="Detailed Description"><textarea value={editing.detailed_description || ''} onChange={(e) => setEditing({ ...editing, detailed_description: e.target.value })} className="input min-h-[120px]" /></Field>
               <Field label="Icon" hint="Lucide icon name"><input value={editing.icon || ''} onChange={(e) => setEditing({ ...editing, icon: e.target.value })} className="input" placeholder="microscope" /></Field>
+              <ImageUploadField
+                label="Cover Image"
+                category="Expertise"
+                value={typeof editing.cover_image === 'string' ? editing.cover_image : editing.cover_image?.url}
+                onChange={(url) => setEditing({ ...editing, cover_image: url })}
+              />
             </FormSection>
             <FormSection title="Publishing">
               <div className="grid sm:grid-cols-3 gap-4">

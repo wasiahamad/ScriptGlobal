@@ -124,7 +124,7 @@ export function DataTable<T extends { id: string }>({
                   </th>
                 ))}
                 {(onEdit || onDelete || onDuplicate || onView || rowActions) && (
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider w-20">
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider w-28 min-w-28">
                     Actions
                   </th>
                 )}
@@ -157,10 +157,10 @@ export function DataTable<T extends { id: string }>({
                       </td>
                     ))}
                     {(onEdit || onDelete || onDuplicate || onView || rowActions) && (
-                      <td className="px-4 py-3 text-right relative">
+                      <td className="px-4 py-3 text-right relative w-28 min-w-28">
                         <button
                           onClick={() => setOpenMenu(openMenu === row.id ? null : row.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 opacity-100 transition-opacity"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
@@ -172,7 +172,7 @@ export function DataTable<T extends { id: string }>({
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="absolute right-4 top-12 z-20 w-40 card p-1 shadow-xl"
+                                className="absolute right-2 top-10 z-20 w-40 card p-1 shadow-xl"
                               >
                                 {onView && (
                                   <button

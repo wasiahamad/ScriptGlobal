@@ -29,6 +29,7 @@ const PageSEOPage = lazy(() => import('@/pages/PageSEOPage'));
 const AdminUsersPage = lazy(() => import('@/pages/AdminUsersPage'));
 const ActivityLogsPage = lazy(() => import('@/pages/ActivityLogsPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const ContactInquiriesPage = lazy(() => import('@/pages/ContactInquiriesPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,6 +63,7 @@ function ProtectedRoutes() {
         <Route path="/website/navigation" element={<NavigationPage />} />
         <Route path="/website/footer" element={<FooterPage />} />
         <Route path="/website/contact" element={<ContactPage />} />
+        <Route path="/contact-inquiries" element={<ContactInquiriesPage />} />
         <Route path="/website/settings" element={<GlobalSettingsPage />} />
         <Route path="/media" element={<MediaLibraryPage />} />
         <Route path="/seo/global" element={<GlobalSEOPage />} />

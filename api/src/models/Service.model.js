@@ -1,8 +1,8 @@
-import { createContentModel, objectIdRef } from "./_createContentModel.js";
+import { createContentModel } from "./_createContentModel.js";
 export default createContentModel("Service", "services", {
-    benefits: [Object],
+    benefits: [String],
     deliverables: [String],
-    process: [Object],
+    process: [String],
     cta: Object,
-    seo: objectIdRef("SEO"),
+    seo: { type: Object, default: {} },
 });

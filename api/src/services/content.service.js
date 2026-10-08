@@ -97,6 +97,9 @@ export async function listContent(type, query, publicOnly = false) {
   const page = Math.max(Number(query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(query.limit) || 20, 1), 100);
   const filter = filterFor(type, publicOnly);
+  if (publicOnly && (type === "faqs" || type === "testimonials")) {
+    delete filter.isActive;
+  }
   if (query.status && !publicOnly) filter.status = query.status;
   if (query.category) filter["data.category"] = query.category;
   if (query.search) filter.$text = { $search: query.search };
@@ -137,6 +140,16 @@ export async function getContent(type, key, publicOnly = false) {
 export async function saveContent(type, body, userId, id) {
   const Model = modelFor(type);
   const payload = { ...body, contentType: type, updatedBy: userId };
+  delete payload.id;
+  delete payload._id;
+  delete payload.createdAt;
+  delete payload.updatedAt;
+  delete payload.created_at;
+  delete payload.updated_at;
+  delete payload.createdBy;
+  delete payload.created_by;
+  delete payload.deletedAt;
+  delete payload.deleted_at;
   if (payload.title && !payload.slug) payload.slug = slugify(payload.title);
   if (payload.status === "published")
     payload.publishedAt = payload.publishedAt || new Date();
@@ -149,7 +162,10 @@ export async function saveContent(type, body, userId, id) {
   if (singletonTypes.has(type))
     return Model.findOneAndUpdate(
       { contentType: type, isDeleted: false },
-      { $set: payload, $setOnInsert: { createdBy: userId } },
+      {
+        $set: payload,
+        $setOnInsert: { createdBy: userId },
+      },
       { new: true, runValidators: true, upsert: true },
     );
   return Model.create({ ...payload, createdBy: userId });

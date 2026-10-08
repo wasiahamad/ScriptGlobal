@@ -7,5 +7,5 @@ export default createContentModel("PeerReview", "peer-review", {
     images: objectIdArray("Media"),
     externalEvidence: [Object],
     cta: Object,
-    seo: objectIdRef("SEO"),
+    seo: { type: Object, default: {} },
 });

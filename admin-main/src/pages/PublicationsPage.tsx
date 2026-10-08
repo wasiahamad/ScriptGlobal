@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, FileText, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { Publication } from '@/lib/types';
 import { PageHeader, StatusBadge, EmptyState } from '@/components/ui';
 import { DataTable, type Column } from '@/components/DataTable';
@@ -18,6 +18,7 @@ const emptyPub: Partial<Publication> = {
 };
 
 export default function PublicationsPage() {
+  const supabase = createBackendDataClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();

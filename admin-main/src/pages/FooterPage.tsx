@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Save, Loader2, Globe } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createBackendDataClient } from '@/lib/backendData';
 import type { FooterSettings } from '@/lib/types';
 import { PageHeader } from '@/components/ui';
 import { FormSection, Field } from '@/components/Form';
@@ -8,6 +8,7 @@ import { useToast } from '@/lib/toast';
 import { useActivityLog } from '@/lib/useActivityLog';
 
 export default function FooterPage() {
+  const supabase = createBackendDataClient();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
   const [settings, setSettings] = useState<Partial<FooterSettings>>({});
@@ -67,6 +68,8 @@ export default function FooterPage() {
             <Field label="Privacy Policy URL"><input value={(settings.legal as Record<string, string>)?.privacy || ''} onChange={(e) => setSettings({ ...settings, legal: { ...(settings.legal as Record<string, string> || {}), privacy: e.target.value } })} className="input" placeholder="/privacy" /></Field>
             <Field label="Terms & Conditions URL"><input value={(settings.legal as Record<string, string>)?.terms || ''} onChange={(e) => setSettings({ ...settings, legal: { ...(settings.legal as Record<string, string> || {}), terms: e.target.value } })} className="input" placeholder="/terms" /></Field>
           </div>
+          <Field label="Privacy Policy Content"><textarea value={(settings.legal as Record<string, string>)?.privacy_content || ''} onChange={(e) => setSettings({ ...settings, legal: { ...(settings.legal as Record<string, string> || {}), privacy_content: e.target.value } })} className="input min-h-[180px]" placeholder="Privacy policy content shown on the public Privacy page" /></Field>
+          <Field label="Terms & Conditions Content"><textarea value={(settings.legal as Record<string, string>)?.terms_content || ''} onChange={(e) => setSettings({ ...settings, legal: { ...(settings.legal as Record<string, string> || {}), terms_content: e.target.value } })} className="input min-h-[180px]" placeholder="Terms and conditions shown on the public Terms page" /></Field>
         </FormSection>
       </div>
     </div>

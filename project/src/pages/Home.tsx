@@ -64,7 +64,10 @@ export default function Home() {
   const faqSection = section('faq');
   const trustItems = Array.isArray(homeContent?.trust_signals) ? homeContent.trust_signals.filter((item): item is string => typeof item === 'string') : trustSignals;
   const expertiseItemsFromCms = Array.isArray(homeContent?.expertise_items) ? homeContent.expertise_items : [];
-  const workCovers = Array.isArray(about.work_covers) ? about.work_covers.filter((item): item is string => typeof item === 'string') : [
+  const missionText = text(about.mission, settings?.about_mission || 'To support researchers and institutions in communicating science with accuracy, integrity, and clarity — adhering to ethical, evidence-based publishing standards.');
+  const workCovers = Array.isArray(about.work_covers) ? about.work_covers
+    .filter((item): item is string => typeof item === 'string')
+    .filter((item) => !/^our mission\s*:/i.test(item.trim()) && item.trim() !== missionText.trim()) : [
     'Research articles', 'Review articles', 'Books & chapters', 'Theses & dissertations',
     'Graphical abstracts', 'Mechanism figures', 'Scientific tables', 'Submission documents',
   ];
@@ -291,7 +294,7 @@ export default function Home() {
                 </div>
                 <div className="mt-5 p-4 rounded-xl bg-gradient-to-r from-teal-50 to-navy-50 border border-teal-100">
                   <p className="text-sm text-teal-800 leading-relaxed">
-                    <strong className="font-semibold">{text(about.mission_label, 'Our Mission')}:</strong> {text(about.mission, settings?.about_mission || 'To support researchers and institutions in communicating science with accuracy, integrity, and clarity — adhering to ethical, evidence-based publishing standards.')}
+                    <strong className="font-semibold">{text(about.mission_label, 'Our Mission')}:</strong> {missionText}
                   </p>
                 </div>
               </div>

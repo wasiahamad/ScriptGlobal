@@ -7,5 +7,5 @@ export default createContentModel("EditingPage", "editing", {
   originalityApproach: [Object],
   images: objectIdArray("Media"),
   cta: Object,
-  seo: objectIdRef("SEO"),
+  seo: { type: Object, default: {} },
 });

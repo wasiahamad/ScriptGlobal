@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { apiUpload } from '@/lib/apiClient';
+import { apiUpload, getApiBaseUrl } from '@/lib/apiClient';
 
 interface FormSectionProps {
   title: string;
@@ -150,11 +150,12 @@ export function ImageUploadField({ label, value, onChange, category = 'General' 
       setUploading(false);
     }
   };
+  const imageUrl = value && value.startsWith('/') ? `${getApiBaseUrl()}${value}` : value;
 
   return (
     <Field label={label}>
       <div className="space-y-2">
-        {value && <img src={value} alt="Selected" className="h-32 w-full rounded-lg object-cover border border-slate-700" />}
+        {imageUrl && <img src={imageUrl} alt="Selected" className="h-32 w-full rounded-lg object-cover border border-slate-700" />}
         <label className="btn btn-secondary inline-flex cursor-pointer">
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {uploading ? 'Uploading...' : value ? 'Replace Image' : 'Upload Image'}
