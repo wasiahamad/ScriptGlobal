@@ -24,10 +24,12 @@ const allowedOrigins = [
     "https://scriptglobal-admin.mdwasia98.workers.dev",
     "https://sciscriptglobal.com",
     "https://www.sciscriptglobal.com",
+    "https://admin.sciscriptglobal.com/",
 ].filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
+
 app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 app.use('/api/v1', publicRateLimit);
 app.get('/health', (req, res) => res.json({ success: true, data: { status: 'ok' } }));
