@@ -16,7 +16,14 @@ import adminUserRoutes from './routes/adminUser.routes.js';
 
 const app = express();
 app.use(helmet());
-const allowedOrigins = [env.publicSiteUrl, env.adminSiteUrl].filter(Boolean);
+const allowedOrigins = [
+    env.publicSiteUrl,
+    env.adminSiteUrl,
+    "http://localhost:5173",
+    "https://scriptglobal.mdwasia98.workers.dev",
+    "https://sciscriptglobal.com",
+    "https://www.sciscriptglobal.com",
+].filter(Boolean);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
