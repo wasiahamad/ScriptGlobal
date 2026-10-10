@@ -7,7 +7,11 @@ import { failure, success } from '../utils/apiResponse.js';
 import { createOpaqueToken, hashToken, signAccessToken, signRefreshToken } from '../utils/tokens.js';
 import { recordActivity } from '../services/activity.service.js';
 
-const cookieOptions = { httpOnly: true, sameSite: 'lax', secure: env.nodeEnv === 'production' };
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: env.cookieSameSite,
+  secure: env.nodeEnv === 'production',
+};
 export const accessCookieOptions = { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 };
 export const refreshCookieOptions = { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000, path: '/api/v1/auth' };
 

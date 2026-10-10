@@ -44,6 +44,9 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || "30d",
   cookieName: process.env.COOKIE_NAME || "sciscript_admin_token",
+  cookieSameSite:
+    process.env.COOKIE_SAME_SITE ||
+    (isProduction ? "none" : "lax"),
   publicSiteUrl: process.env.PUBLIC_SITE_URL,
   adminSiteUrl: process.env.ADMIN_SITE_URL,
   email: {
