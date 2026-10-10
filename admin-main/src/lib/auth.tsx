@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { Session } from '@supabase/supabase-js';
 import { apiRequest } from './apiClient';
+
+interface Session {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+}
 
 interface AuthContextValue {
   session: Session | null;

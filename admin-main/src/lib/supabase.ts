@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@supabase/supabase-js';
 import { createBackendDataClient } from './backendData';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 type LocalRecord = Record<string, any>;
 
@@ -185,16 +181,5 @@ function createLocalClient() {
   };
 }
 
-export const isLocalMode = !supabaseUrl || !supabaseAnonKey;
-
-const useLegacySupabase = import.meta.env.VITE_USE_SUPABASE === 'true' && Boolean(supabaseUrl && supabaseAnonKey);
-
-export const supabase = useLegacySupabase
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-    })
-  : createBackendDataClient();
+export const isLocalMode = false;
+export const supabase = createBackendDataClient();

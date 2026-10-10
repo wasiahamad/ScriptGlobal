@@ -287,7 +287,7 @@ export function createBackendDataClient() {
   return {
     from: (table: string) => new ApiQuery(table),
     auth: {
-      updateUser: async () => ({ data: null, error: { message: 'Use the API account settings endpoint to change passwords.' } }),
+      updateUser: async (..._args: unknown[]) => ({ data: null, error: { message: 'Use the API account settings endpoint to change passwords.' } }),
     },
     storage: {
       from: () => ({

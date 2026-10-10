@@ -1,4 +1,3 @@
-import { supabase } from './supabase';
 import type {
   SiteSettings,
   Service,
@@ -213,25 +212,14 @@ export async function getHomeContent(): Promise<Record<string, unknown> | null> 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   try {
     const backend = await getBackendSingleton('settings');
-    if (backend) {
-      return {
-        ...backend,
-        brand_name: String(backend.brand_name || backend.website_name || 'SciScript'),
-        default_seo_title: (backend.default_seo_title as string | null) || null,
-        default_meta_description: (backend.default_meta_description as string | null) || null,
-        is_active: backend.is_active !== false,
-      } as SiteSettings;
-    }
-    const { data, error } = await supabase
-      .from('site_settings')
-      .select('*')
-      .eq('is_active', true)
-      .maybeSingle();
-    if (error) {
-      console.error('Error fetching site settings:', error);
-      return null;
-    }
-    return data as SiteSettings | null;
+    if (!backend) return null;
+    return {
+      ...backend,
+      brand_name: String(backend.brand_name || backend.website_name || 'SciScript'),
+      default_seo_title: (backend.default_seo_title as string | null) || null,
+      default_meta_description: (backend.default_meta_description as string | null) || null,
+      is_active: backend.is_active !== false,
+    } as SiteSettings;
   } catch (error) {
     console.error('Error fetching site settings:', error);
     return null;
@@ -241,17 +229,7 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
 export async function getServices(): Promise<Service[]> {
   try {
     const backend = await getBackendCollection<Service>('services');
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('is_published', true)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching services:', error);
-      return [];
-    }
-    return (data || []) as Service[];
+    return backend || [];
   } catch (error) {
     console.error('Error fetching services:', error);
     return [];
@@ -261,18 +239,7 @@ export async function getServices(): Promise<Service[]> {
 export async function getServiceBySlug(slug: string): Promise<Service | null> {
   try {
     const backend = await getBackendDetail<Service>('services', slug);
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('slug', slug)
-      .eq('is_published', true)
-      .maybeSingle();
-    if (error) {
-      console.error('Error fetching service:', error);
-      return null;
-    }
-    return data as Service | null;
+    return backend;
   } catch (error) {
     console.error('Error fetching service:', error);
     return null;
@@ -282,17 +249,7 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
 export async function getResearchAreas(): Promise<ResearchArea[]> {
   try {
     const backend = await getBackendCollection<ResearchArea>('expertise');
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('research_areas')
-      .select('*')
-      .eq('is_published', true)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching research areas:', error);
-      return [];
-    }
-    return (data || []) as ResearchArea[];
+    return backend || [];
   } catch (error) {
     console.error('Error fetching research areas:', error);
     return [];
@@ -302,18 +259,7 @@ export async function getResearchAreas(): Promise<ResearchArea[]> {
 export async function getResearchAreaBySlug(slug: string): Promise<ResearchArea | null> {
   try {
     const backend = await getBackendDetail<ResearchArea>('expertise', slug);
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('research_areas')
-      .select('*')
-      .eq('slug', slug)
-      .eq('is_published', true)
-      .maybeSingle();
-    if (error) {
-      console.error('Error fetching research area:', error);
-      return null;
-    }
-    return data as ResearchArea | null;
+    return backend;
   } catch (error) {
     console.error('Error fetching research area:', error);
     return null;
@@ -323,17 +269,7 @@ export async function getResearchAreaBySlug(slug: string): Promise<ResearchArea 
 export async function getProjects(): Promise<Project[]> {
   try {
     const backend = await getBackendCollection<Project>('projects');
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*, research_area:research_areas(*)')
-      .eq('is_published', true)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching projects:', error);
-      return [];
-    }
-    return (data || []) as Project[];
+    return backend || [];
   } catch (error) {
     console.error('Error fetching projects:', error);
     return [];
@@ -343,18 +279,7 @@ export async function getProjects(): Promise<Project[]> {
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   try {
     const backend = await getBackendDetail<Project>('projects', slug);
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*, research_area:research_areas(*)')
-      .eq('slug', slug)
-      .eq('is_published', true)
-      .maybeSingle();
-    if (error) {
-      console.error('Error fetching project:', error);
-      return null;
-    }
-    return data as Project | null;
+    return backend;
   } catch (error) {
     console.error('Error fetching project:', error);
     return null;
@@ -364,17 +289,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 export async function getPublications(): Promise<Publication[]> {
   try {
     const backend = await getBackendCollection<Publication>('publications');
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('publications')
-      .select('*, research_area:research_areas(*)')
-      .eq('is_published', true)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching publications:', error);
-      return [];
-    }
-    return (data || []) as Publication[];
+    return backend || [];
   } catch (error) {
     console.error('Error fetching publications:', error);
     return [];
@@ -384,17 +299,7 @@ export async function getPublications(): Promise<Publication[]> {
 export async function getScientificVisuals(): Promise<ScientificVisual[]> {
   try {
     const backend = await getBackendCollection<ScientificVisual>('scientific-visuals');
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('scientific_visuals')
-      .select('*, research_area:research_areas(*)')
-      .eq('is_published', true)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching scientific visuals:', error);
-      return [];
-    }
-    return (data || []) as ScientificVisual[];
+    return backend || [];
   } catch (error) {
     console.error('Error fetching scientific visuals:', error);
     return [];
@@ -410,16 +315,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
       testimonial: item.testimonial || '',
       photo: item.photo || (item as Testimonial & { profile_image?: string }).profile_image || null,
     }));
-    const { data, error } = await supabase
-      .from('testimonials')
-      .select('*')
-      .eq('is_published', true)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching testimonials:', error);
-      return [];
-    }
-    return (data || []) as Testimonial[];
+    return [];
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     return [];
@@ -437,17 +333,7 @@ export async function getFaqs(): Promise<Faq[]> {
         answer: item.answer || '',
         display_order: item.display_order ?? 0,
       }));
-    const { data, error } = await supabase
-      .from('faqs')
-      .select('*')
-      .eq('is_published', true)
-      .not('answer', 'is', null)
-      .order('display_order', { ascending: true });
-    if (error) {
-      console.error('Error fetching FAQs:', error);
-      return [];
-    }
-    return (data || []) as Faq[];
+    return [];
   } catch (error) {
     console.error('Error fetching FAQs:', error);
     return [];
@@ -457,17 +343,7 @@ export async function getFaqs(): Promise<Faq[]> {
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const backend = await getBackendCollection<BlogPost>('blog-posts');
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('is_published', true)
-      .order('published_at', { ascending: false });
-    if (error) {
-      console.error('Error fetching blog posts:', error);
-      return [];
-    }
-    return (data || []) as BlogPost[];
+    return backend || [];
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     return [];
@@ -477,18 +353,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
     const backend = await getBackendDetail<BlogPost>('blog-posts', slug);
-    if (backend) return backend;
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('is_published', true)
-      .maybeSingle();
-    if (error) {
-      console.error('Error fetching blog post:', error);
-      return null;
-    }
-    return data as BlogPost | null;
+    return backend;
   } catch (error) {
     console.error('Error fetching blog post:', error);
     return null;

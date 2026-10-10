@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FlaskConical, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/lib/toast';
 
@@ -46,7 +46,7 @@ export default function LoginPage() {
         <div className="card p-8 shadow-2xl">
           <div className="flex flex-col items-center mb-8">
             <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-600/20 border border-teal-500/30 mb-4">
-              <FlaskConical className="w-7 h-7 text-teal-400" />
+              <img src="/images/sciscript-logo.png" alt="" className="h-12 w-12 rounded-xl object-cover" />
             </div>
             <h1 className="text-2xl font-bold text-white">SciScript Admin</h1>
             <p className="text-sm text-slate-400 mt-1">Global Scientific Writing Services</p>

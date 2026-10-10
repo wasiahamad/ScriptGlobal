@@ -23,7 +23,6 @@ import {
   Search,
   Users,
   Activity,
-  FlaskConical,
   X,
   PanelLeftClose,
   PanelLeft,
@@ -121,8 +120,8 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
       >
         {/* Logo */}
         <div className={cn('flex items-center gap-3 px-4 h-16 border-b border-slate-800 flex-shrink-0', collapsed && 'justify-center')}>
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-teal-600/20 border border-teal-500/30 flex-shrink-0">
-            <FlaskConical className="w-5 h-5 text-teal-400" />
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-teal-500/30">
+          <img src="/images/sciscript-logo.png" alt="" className="h-full w-full object-cover" />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">
