@@ -11,7 +11,11 @@ import type {
   ContactSubmission,
 } from '@/types';
 
-const backendApiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+if (!configuredApiUrl) {
+  throw new Error('VITE_API_URL is required. Configure it in the frontend environment.');
+}
+const backendApiUrl = configuredApiUrl.replace(/\/$/, '');
 
 function normalizeBackend(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(normalizeBackend);

@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+if (!configuredApiUrl) {
+  throw new Error('VITE_API_URL is required. Configure it in the admin environment.');
+}
+const apiBaseUrl = configuredApiUrl.replace(/\/$/, '');
 
 const resourceByTable: Record<string, string> = {
   services: 'services',

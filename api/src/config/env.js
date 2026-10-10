@@ -21,8 +21,18 @@ function getMongoUri() {
   return `mongodb://${source.username}:${source.password}@${hosts}/sciscript?authSource=admin&replicaSet=atlas-azt9j5-shard-0&tls=true`;
 }
 
-if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
-  throw new Error("Missing required environment variable: JWT_SECRET");
+const isProduction = process.env.NODE_ENV === "production";
+const requiredProductionEnv = [
+  "MONGO_URI",
+  "JWT_SECRET",
+  "PUBLIC_SITE_URL",
+  "ADMIN_SITE_URL",
+];
+if (isProduction) {
+  const missing = requiredProductionEnv.filter((name) => !process.env[name]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required production environment variables: ${missing.join(", ")}`);
+  }
 }
 
 export const env = {
@@ -34,8 +44,8 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   refreshExpiresIn: process.env.REFRESH_EXPIRES_IN || "30d",
   cookieName: process.env.COOKIE_NAME || "sciscript_admin_token",
-  publicSiteUrl: process.env.PUBLIC_SITE_URL || "http://localhost:5173",
-  adminSiteUrl: process.env.ADMIN_SITE_URL || "http://localhost:5174",
+  publicSiteUrl: process.env.PUBLIC_SITE_URL,
+  adminSiteUrl: process.env.ADMIN_SITE_URL,
   email: {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
