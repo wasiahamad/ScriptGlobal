@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Atom, Mail, Phone, MapPin, Linkedin, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, ExternalLink } from 'lucide-react';
 import type { SiteSettings } from '@/types';
 import { getPublicFooter, type PublicFooterContent } from '@/lib/api';
 
@@ -56,8 +56,8 @@ export default function Footer({ siteSettings }: { siteSettings: SiteSettings | 
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-navy-800 text-teal-400">
-                <Atom className="w-5 h-5" />
+              <span className="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm">
+                <img src="/images/sciscript-logo.png" alt="" className="h-full w-full object-cover" />
               </span>
               <span className="flex flex-col leading-tight">
                 <span className="font-bold text-lg text-white">{footer?.brand_name || 'SciScript'}</span>

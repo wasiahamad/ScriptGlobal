@@ -103,7 +103,7 @@ export default function Home() {
       />
 
       {/* ============ HERO ============ */}
-      <section className="scientific-hero relative min-h-[760px] lg:min-h-[900px] flex items-center overflow-hidden bg-white">
+      <section className="scientific-hero relative flex min-h-[680px] items-center overflow-hidden bg-white sm:min-h-[760px] lg:min-h-[900px]">
         <div className="absolute inset-0" aria-hidden="true">
           <img
             src="/images/hero-bg.png"
@@ -121,7 +121,7 @@ export default function Home() {
           <DnaHelix className="h-full w-full dna-float" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-20 pt-20 sm:px-6 lg:px-8 lg:pb-18 lg:pt-8">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-14 pt-24 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8 lg:pb-18 lg:pt-8">
           <div className="max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -137,7 +137,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="editorial-heading max-w-4xl break-words text-[1.2rem] leading-[0.98] text-[#0a0a0a] sm:text-6xl md:text-7xl lg:text-[4.9rem]"
+              className="editorial-heading max-w-4xl break-words text-3xl leading-[1.05] text-[#0a0a0a] sm:text-6xl md:text-7xl lg:text-[4.9rem]"
             >
               {text(hero.heading, 'Evidence-Based Scientific Writing for Biomedical & Pharmaceutical Research')}
             </motion.h1>

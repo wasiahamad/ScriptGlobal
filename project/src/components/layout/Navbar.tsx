@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Atom, ArrowRight, ChevronDown } from 'lucide-react';
+import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { getPublicNavigation } from '@/lib/api';
 import { useSiteData } from '@/context/SiteDataContext';
 
@@ -50,17 +50,17 @@ export default function Navbar() {
         }`}
       >
         <nav className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex h-16 items-center justify-between lg:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group" aria-label="SciScript Global home">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#0a0a0a] text-[#14b8a6] shadow-sm group-hover:bg-[#0f766e] transition-colors">
-                <Atom className="w-5 h-5" />
+            <Link to="/" className="flex min-w-0 items-center gap-2.5 group" aria-label="SciScript Global home">
+              <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200 transition-colors group-hover:ring-teal-300">
+                <img src="/images/sciscript-logo.png" alt="" className="h-full w-full object-cover" />
               </span>
-              <span className="flex flex-col leading-tight">
-                  <span className="font-bold text-base lg:text-lg text-[#0a0a0a] transition-colors">
+              <span className="flex min-w-0 flex-col leading-tight">
+                  <span className="truncate text-sm font-bold text-[#0a0a0a] transition-colors sm:text-base lg:text-lg">
                   {settings?.brand_name || 'SciScript'}
                 </span>
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-[#0f766e] transition-colors">
+                  <span className="hidden text-[10px] font-medium uppercase tracking-wider text-[#0f766e] transition-colors sm:block">
                   {settings?.tagline || 'Global Scientific Writing'}
                 </span>
               </span>
