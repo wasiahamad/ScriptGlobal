@@ -16,6 +16,17 @@ import adminUserRoutes from './routes/adminUser.routes.js';
 
 const app = express();
 app.use(helmet());
+
+const normalizeOrigin = (value) => {
+    if (!value) return null;
+
+    try {
+        return new URL(value).origin;
+    } catch {
+        return value.trim().replace(/\/+$/, '');
+    }
+};
+
 const allowedOrigins = [
     env.publicSiteUrl,
     env.adminSiteUrl,
@@ -24,9 +35,22 @@ const allowedOrigins = [
     "https://scriptglobal-admin.mdwasia98.workers.dev",
     "https://sciscriptglobal.com",
     "https://www.sciscriptglobal.com",
-    "https://admin.sciscriptglobal.com/",
-].filter(Boolean);
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+    "https://admin.sciscriptglobal.com",
+]
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+app.use(cors({
+    origin: (requestOrigin, callback) => {
+        if (!requestOrigin || allowedOrigins.includes(normalizeOrigin(requestOrigin))) {
+            callback(null, true);
+            return;
+        }
+
+        callback(new Error(`CORS origin not allowed: ${requestOrigin}`));
+    },
+    credentials: true,
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
