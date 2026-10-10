@@ -21,6 +21,7 @@ const allowedOrigins = [
     env.adminSiteUrl,
     "http://localhost:5173",
     "https://scriptglobal.mdwasia98.workers.dev",
+    "https://scriptglobal-admin.mdwasia98.workers.dev",
     "https://sciscriptglobal.com",
     "https://www.sciscriptglobal.com",
 ].filter(Boolean);
