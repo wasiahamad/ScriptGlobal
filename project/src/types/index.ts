@@ -84,7 +84,7 @@ export interface Project {
   publication_link: string | null;
   year: number | null;
   images: string[];
-  featured_image?: string | null;
+  featured_image?: string | { url: string; alt?: string | null } | null;
   is_published: boolean;
   display_order: number;
   seo_title: string | null;

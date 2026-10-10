@@ -94,7 +94,7 @@ export default function ServiceDetail() {
       />
 
       {/* Hero */}
-      <section className="page-hero page-hero--detail relative py-20 lg:py-28 overflow-hidden">
+      <section className="page-hero page-hero--detail-services relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -107,8 +107,12 @@ export default function ServiceDetail() {
               All Services
             </Link>
             <div className="flex items-start gap-5">
-              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-navy-800 text-teal-400 flex items-center justify-center">
-                <Icon className="w-8 h-8" />
+              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-navy-800 text-teal-400 shadow-sm">
+                {image ? (
+                  <img src={image} alt={imageAlt} className="h-full w-full object-cover" />
+                ) : (
+                  <Icon className="h-8 w-8" />
+                )}
               </div>
               <div>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-navy-900 leading-tight mb-3">
@@ -124,7 +128,6 @@ export default function ServiceDetail() {
                 {service.short_description}
               </p>
             )}
-            {image && <img src={image} alt={imageAlt} className="mt-8 w-full max-h-96 object-cover rounded-2xl shadow-lg" />}
           </motion.div>
         </div>
       </section>

@@ -71,7 +71,7 @@ export default function Services() {
       <section className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2">
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : services.length === 0 ? (
@@ -92,14 +92,23 @@ export default function Services() {
                   >
                     <Link
                       to={`/services/${service.slug}`}
-                      className="group block h-full overflow-hidden bg-white rounded-2xl border border-navy-100 shadow-sm hover:shadow-xl hover:border-teal-200 transition-all duration-300"
+                      className="group flex h-full min-h-[620px] flex-col overflow-hidden rounded-3xl border border-navy-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-300 hover:shadow-2xl"
                     >
-                      {image && <img src={image} alt={imageAlt} className="w-full h-52 object-cover group-hover:scale-[1.02] transition-transform duration-300" loading="lazy" />}
-                      <div className="p-8">
-                      <div className="flex items-start gap-5 mb-5">
-                        <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-navy-50 group-hover:bg-teal-50 transition-colors flex items-center justify-center">
-                          <Icon className="w-7 h-7 text-navy-700 group-hover:text-teal-600 transition-colors" />
+                      <div className="relative h-56 shrink-0 overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-teal-800">
+                        {image ? (
+                          <img src={image} alt={imageAlt} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center">
+                            <Icon className="h-16 w-16 text-teal-200/80" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute bottom-5 left-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 shadow-lg">
+                          <Icon className="h-6 w-6 text-teal-700" />
                         </div>
+                      </div>
+                      <div className="flex flex-1 flex-col p-8">
+                      <div className="mb-5">
                         <div className="flex-1">
                           <h2 className="text-xl font-bold text-navy-900 mb-1 group-hover:text-teal-700 transition-colors">
                             {service.title}
@@ -132,7 +141,7 @@ export default function Services() {
                           )}
                         </div>
                       )}
-                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 group-hover:gap-2.5 transition-all">
+                      <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 group-hover:gap-2.5 transition-all">
                         View Service Details
                         <ArrowRight className="w-4 h-4" />
                       </span>

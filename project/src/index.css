@@ -15,7 +15,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.82) 48%, rgba(255,255,255,.18) 100%), url('/images/hero-bg.png');
+  background-image: linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.82) 48%, rgba(255,255,255,.18) 100%), var(--hero-image, url('/images/hero-bg.png'));
   background-size: cover;
   background-position: center;
   opacity: .94;
@@ -48,17 +48,20 @@
   color: #171717;
 }
 
-.page-hero--about::before { background-position: 22% center; filter: hue-rotate(-8deg); }
-.page-hero--services::before { background-position: 78% center; filter: hue-rotate(8deg) saturate(1.08); }
-.page-hero--research::before { background-position: 42% center; filter: hue-rotate(18deg) saturate(.92); }
-.page-hero--visuals::before { background-position: 92% center; filter: hue-rotate(32deg) saturate(1.12); }
-.page-hero--publication::before { background-position: 60% center; filter: hue-rotate(-18deg) saturate(1.05); }
-.page-hero--insights::before { background-position: 12% center; filter: hue-rotate(42deg) saturate(.9); }
-.page-hero--testimonials::before { background-position: 68% center; filter: hue-rotate(25deg); }
-.page-hero--faqs::before { background-position: 34% center; filter: hue-rotate(-28deg) saturate(.95); }
-.page-hero--contact::before { background-position: 84% center; filter: hue-rotate(55deg) saturate(1.08); }
-.page-hero--portfolio::before { background-position: 50% center; filter: hue-rotate(68deg) saturate(.98); }
-.page-hero--detail::before { background-position: 26% center; filter: hue-rotate(12deg) saturate(1.06); }
+.page-hero--about::before { --hero-image: url('/images/hero_02_about.png'); background-position: center; }
+.page-hero--services::before,
+.page-hero--detail-services::before { --hero-image: url('/images/hero_03_services.png'); background-position: center; }
+.page-hero--research::before { --hero-image: url('/images/hero_09_research_areas.png'); background-position: center; }
+.page-hero--detail-expertise::before,
+.page-hero--testimonials::before { --hero-image: url('/images/hero_05_expertise.png'); background-position: center; }
+.page-hero--visuals::before { --hero-image: url('/images/hero_10_scientific_visuals.png'); background-position: center; }
+.page-hero--publication::before { --hero-image: url('/images/hero_11_publication_support.png'); background-position: center; }
+.page-hero--insights::before,
+.page-hero--detail-insights::before { --hero-image: url('/images/hero_04_insights.png'); background-position: center; }
+.page-hero--faqs::before { --hero-image: url('/images/hero_07_faq.png'); background-position: center; }
+.page-hero--contact::before { --hero-image: url('/images/hero_08_contact.png'); background-position: center; }
+.page-hero--portfolio::before,
+.page-hero--detail-work::before { --hero-image: url('/images/hero_06_work.png'); background-position: center; }
 
 @media (max-width: 640px) {
   .page-hero {

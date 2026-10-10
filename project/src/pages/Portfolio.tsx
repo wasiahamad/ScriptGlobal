@@ -147,6 +147,12 @@ export default function Portfolio() {
               <AnimatePresence mode="popLayout">
                 {filteredProjects.map((project, i) => {
                   const areaName = getAreaName(project.research_area_id);
+                  const projectImage = typeof project.featured_image === 'string'
+                    ? project.featured_image
+                    : project.featured_image?.url;
+                  const projectImageAlt = typeof project.featured_image === 'object' && project.featured_image
+                    ? project.featured_image.alt || project.title
+                    : project.title;
                   return (
                     <motion.div
                       key={project.id}
@@ -158,16 +164,26 @@ export default function Portfolio() {
                     >
                       <Link
                         to={`/portfolio/${project.slug}`}
-                        className="group block h-full bg-offwhite rounded-2xl border border-navy-100 overflow-hidden hover:shadow-xl hover:border-teal-200 transition-all duration-300"
+                        className="group block h-full bg-white rounded-2xl border border-navy-100 overflow-hidden hover:shadow-2xl hover:border-teal-300 hover:-translate-y-1 transition-all duration-300"
                       >
+                        <div className="relative h-56 overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-teal-800">
+                          {projectImage ? (
+                            <img src={projectImage} alt={projectImageAlt} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <FileSearch className="h-14 w-14 text-teal-200/70" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" />
+                          {project.category && (
+                            <span className="absolute bottom-4 left-4 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-teal-800 shadow-sm">
+                              <Tag className="h-3 w-3" />
+                              {project.category}
+                            </span>
+                          )}
+                        </div>
                         <div className="p-6">
                           <div className="flex items-center gap-2 mb-3 flex-wrap">
-                            {project.category && (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 text-xs font-medium">
-                                <Tag className="w-3 h-3" />
-                                {project.category}
-                              </span>
-                            )}
                             {areaName && (
                               <span className="px-2.5 py-1 rounded-md bg-navy-50 text-navy-600 text-xs font-medium">
                                 {areaName}

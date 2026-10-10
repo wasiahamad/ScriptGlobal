@@ -1,15 +1,21 @@
 import { contentController } from './content.controller.js';
 import ContactInquiry from '../models/ContactInquiry.model.js';
-import { sendContactNotification } from '../services/email.service.js';
+import { sendContactAutoReply, sendContactNotification } from '../services/email.service.js';
 import { failure, success } from '../utils/apiResponse.js';
 export const contactController = contentController('contact');
 
 export async function createContactInquiry(req, res) {
   const inquiry = await ContactInquiry.create(req.body);
-  try {
-    await sendContactNotification(inquiry.toObject());
-  } catch (error) {
-    console.error("Contact inquiry email notification failed:", error);
+  const inquiryData = inquiry.toObject();
+  const emailResults = await Promise.allSettled([
+    sendContactNotification(inquiryData),
+    sendContactAutoReply(inquiryData),
+  ]);
+  for (const [index, result] of emailResults.entries()) {
+    if (result.status === "rejected") {
+      const label = index === 0 ? "notification" : "auto-reply";
+      console.error(`Contact inquiry ${label} email failed:`, result.reason);
+    }
   }
   return success(res, inquiry, 'Inquiry submitted successfully', null, 201);
 }

@@ -101,7 +101,7 @@ export default function ProjectDetail() {
       />
 
       {/* Hero */}
-      <section className="page-hero page-hero--detail relative py-20 lg:py-28 overflow-hidden">
+      <section className="page-hero page-hero--detail-work relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -152,7 +152,11 @@ export default function ProjectDetail() {
       {project.featured_image && (
         <section className="py-12 bg-offwhite">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <img src={project.featured_image} alt={project.title} className="w-full max-h-[34rem] object-cover rounded-2xl border border-navy-100" />
+            <img
+              src={typeof project.featured_image === 'string' ? project.featured_image : project.featured_image.url}
+              alt={typeof project.featured_image === 'object' && project.featured_image.alt ? project.featured_image.alt : project.title}
+              className="w-full max-h-[34rem] object-cover rounded-2xl border border-navy-100"
+            />
           </div>
         </section>
       )}

@@ -86,7 +86,7 @@ export default function ResearchAreaDetail() {
       />
 
       {/* Hero */}
-      <section className="page-hero page-hero--detail relative py-20 lg:py-28 overflow-hidden">
+      <section className="page-hero page-hero--detail-expertise relative py-20 lg:py-28 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div

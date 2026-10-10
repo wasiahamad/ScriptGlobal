@@ -318,6 +318,8 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((service, i) => {
                 const Icon = getIcon(service.icon);
+                const serviceImage = typeof service.featured_image === 'string' ? service.featured_image : service.featured_image?.url;
+                const serviceImageAlt = service.featured_image && typeof service.featured_image === 'object' ? service.featured_image.alt || service.title : service.title;
                 return (
                   <motion.div
                     key={service.id}
@@ -328,21 +330,26 @@ export default function Home() {
                   >
                     <Link
                       to={`/services/${service.slug}`}
-                      className="group block h-full bg-white rounded-2xl border border-navy-100 p-7 hover:shadow-2xl hover:border-teal-300 hover:-translate-y-1 transition-all duration-300"
+                      className="group block h-full overflow-hidden bg-white rounded-2xl border border-navy-100 hover:shadow-2xl hover:border-teal-300 hover:-translate-y-1 transition-all duration-300"
                     >
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-navy-50 to-navy-100 group-hover:from-teal-50 group-hover:to-teal-100 transition-all duration-300 flex items-center justify-center mb-5 shadow-sm">
-                        <Icon className="w-7 h-7 text-navy-700 group-hover:text-teal-600 transition-colors" />
+                      <div className="relative h-44 overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-teal-800">
+                        {serviceImage ? (
+                          <img src={serviceImage} alt={serviceImageAlt} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center">
+                            <Icon className="h-14 w-14 text-teal-200/80" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+                        <div className="absolute bottom-4 left-5 flex h-11 w-11 items-center justify-center rounded-xl bg-white/95 shadow-sm">
+                          <Icon className="h-6 w-6 text-teal-700" />
+                        </div>
                       </div>
-                      <h3 className="text-lg font-bold text-navy-900 mb-2 group-hover:text-teal-700 transition-colors">
-                        {service.title}
-                      </h3>
-                      <p className="text-sm text-navy-500 leading-relaxed mb-4">
-                        {service.short_description}
-                      </p>
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-teal-600 group-hover:gap-2.5 transition-all">
-                        Learn More
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
+                      <div className="p-7">
+                        <h3 className="text-lg font-bold text-navy-900 mb-2 group-hover:text-teal-700 transition-colors">{service.title}</h3>
+                        <p className="text-sm text-navy-500 leading-relaxed mb-4">{service.short_description}</p>
+                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-teal-600 group-hover:gap-2.5 transition-all">Explore Service <ArrowRight className="w-4 h-4" /></span>
+                      </div>
                     </Link>
                   </motion.div>
                 );
@@ -364,9 +371,10 @@ export default function Home() {
           {loading ? (
             <SkeletonGrid count={6} />
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="mx-auto grid max-w-6xl grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {researchAreas.map((area, i) => {
                 const Icon = getIcon(area.icon);
+                const areaImage = typeof area.cover_image === 'string' ? area.cover_image : area.cover_image?.url;
                 return (
                   <motion.div
                     key={area.id}
@@ -377,14 +385,40 @@ export default function Home() {
                   >
                     <Link
                       to={`/research-areas/${area.slug}`}
-                      className="group flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-navy-100 hover:shadow-xl hover:border-teal-300 hover:-translate-y-1 transition-all duration-300"
+                      className="group flex h-full min-h-[390px] w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-2 hover:border-teal-300 hover:shadow-[0_20px_45px_rgba(15,118,110,0.16)]"
                     >
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 group-hover:from-teal-100 group-hover:to-teal-200 transition-all duration-300 flex items-center justify-center mb-3 shadow-sm">
-                        <Icon className="w-7 h-7 text-teal-600" />
+                      <div className="relative h-44 shrink-0 overflow-hidden bg-gradient-to-br from-[#e6fffb] via-[#f2f8f7] to-[#d9f3ef]">
+                        {areaImage ? (
+                          <img src={areaImage} alt={area.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        ) : (
+                          <div className="relative flex h-full items-center justify-center overflow-hidden">
+                            <div className="absolute -right-8 -top-10 h-36 w-36 rounded-full border-[18px] border-teal-200/40" />
+                            <div className="absolute -bottom-16 -left-10 h-40 w-40 rounded-full border-[22px] border-white/70" />
+                            <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-white/80 shadow-sm ring-1 ring-teal-200/70">
+                              <Icon className="h-10 w-10 text-teal-700" />
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/20 to-transparent" />
+                        {areaImage && (
+                          <div className="absolute bottom-4 left-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/70 bg-white/95 shadow-lg">
+                            <Icon className="h-6 w-6 text-teal-700" />
+                          </div>
+                        )}
                       </div>
-                      <span className="text-sm font-bold text-navy-800 group-hover:text-teal-700 transition-colors">
-                        {area.name}
-                      </span>
+                      <div className="flex flex-1 flex-col p-6">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-teal-600">Research domain</p>
+                        <h3 className="mb-3 text-xl font-bold text-navy-900 transition-colors group-hover:text-teal-700">
+                          {area.name}
+                        </h3>
+                        <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-navy-500">
+                          {area.short_description || 'Scientific writing and publication support tailored to this research domain.'}
+                        </p>
+                        <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-teal-600 transition-all group-hover:gap-2">
+                          Explore Area
+                          <ChevronRight className="h-4 w-4" />
+                        </span>
+                      </div>
                     </Link>
                   </motion.div>
                 );
