@@ -11,6 +11,10 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(32).max(256),
   password: z.string().min(8).max(200),
 });
+export const passwordChangeOtpSchema = z.object({
+  code: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit code"),
+  password: z.string().min(8).max(200),
+});
 export const inquirySchema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.string().email().max(160),

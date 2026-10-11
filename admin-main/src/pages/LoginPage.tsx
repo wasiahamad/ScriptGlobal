@@ -6,29 +6,21 @@ import { useAuth } from '@/lib/auth';
 import { useToast } from '@/lib/toast';
 
 export default function LoginPage() {
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    if (mode === 'login') {
-      const { error } = await signIn(email, password);
-      if (error) toast(error, 'error');
-      else {
-        toast('Welcome back!', 'success');
-        navigate('/dashboard', { replace: true });
-      }
-    } else {
-      const { error } = await signUp(email, password, name);
-      if (error) toast(error, 'error');
-      else toast('Account created successfully.', 'success');
+    const { error } = await signIn(email, password);
+    if (error) toast(error, 'error');
+    else {
+      toast('Welcome back!', 'success');
+      navigate('/dashboard', { replace: true });
     }
     setLoading(false);
   };
@@ -53,19 +45,6 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'signup' && (
-              <div>
-                <label className="label">Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="input"
-                  placeholder="Your name"
-                  required
-                />
-              </div>
-            )}
             <div>
               <label className="label">Email</label>
               <div className="relative">
@@ -101,21 +80,14 @@ export default function LoginPage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  {mode === 'login' ? 'Login' : 'Create Account'}
+                  Login
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
-            >
-              {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Login'}
-            </button>
-          </div>
+          <p className="mt-6 text-center text-sm text-slate-500">Admin accounts are created by an authorized administrator only.</p>
         </div>
 
         <p className="text-center text-xs text-slate-500 mt-6">

@@ -15,7 +15,10 @@ import {
   me,
   refresh,
   resetPassword,
+  requestPasswordChangeOtp,
+  changePasswordWithOtp,
 } from "../controllers/auth.controller.js";
+import { passwordChangeOtpSchema } from "../validators/common.validators.js";
 
 const router = Router();
 router.post(
@@ -27,6 +30,13 @@ router.post(
 router.post("/logout", asyncHandler(logout));
 router.post("/refresh", asyncHandler(refresh));
 router.get("/me", requireAuth, me);
+router.post("/password-change/request-otp", requireAuth, asyncHandler(requestPasswordChangeOtp));
+router.post(
+  "/password-change/verify",
+  requireAuth,
+  validateBody(passwordChangeOtpSchema),
+  asyncHandler(changePasswordWithOtp),
+);
 router.post(
   "/forgot-password",
   authRateLimit,

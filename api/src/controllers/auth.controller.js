@@ -6,6 +6,9 @@ import { env } from '../config/env.js';
 import { failure, success } from '../utils/apiResponse.js';
 import { createOpaqueToken, hashToken, signAccessToken, signRefreshToken } from '../utils/tokens.js';
 import { recordActivity } from '../services/activity.service.js';
+import crypto from 'node:crypto';
+import AdminPasswordOtp from '../models/AdminPasswordOtp.model.js';
+import { sendPasswordChangeOtp } from '../services/email.service.js';
 
 const cookieOptions = {
   httpOnly: true,
@@ -51,6 +54,58 @@ export async function refresh(req, res) {
 }
 
 export function me(req, res) { return success(res, req.adminUser, 'Session fetched successfully'); }
+
+export async function requestPasswordChangeOtp(req, res) {
+  const code = crypto.randomInt(100000, 1000000).toString();
+  await AdminPasswordOtp.deleteMany({ adminUser: req.adminUser._id });
+  await AdminPasswordOtp.create({
+    adminUser: req.adminUser._id,
+    codeHash: hashToken(code),
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+  });
+
+  try {
+    await sendPasswordChangeOtp(req.adminUser, code);
+  } catch (error) {
+    await AdminPasswordOtp.deleteMany({ adminUser: req.adminUser._id });
+    console.error("Password change OTP delivery failed:", error);
+    return failure(res, "Unable to send the verification code. Please try again later.", [], 503);
+  }
+
+  return success(res, { email: req.adminUser.email }, "Verification code sent to your registered email");
+}
+
+export async function changePasswordWithOtp(req, res) {
+  const otp = await AdminPasswordOtp.findOne({
+    adminUser: req.adminUser._id,
+    expiresAt: { $gt: new Date() },
+  }).sort({ createdAt: -1 });
+  if (!otp) return failure(res, "Verification code expired or not requested", [], 400);
+  if (otp.attempts >= 5) {
+    await otp.deleteOne();
+    return failure(res, "Too many invalid attempts. Request a new verification code.", [], 429);
+  }
+
+  if (hashToken(req.body.code) !== otp.codeHash) {
+    otp.attempts += 1;
+    await otp.save();
+    return failure(res, "Invalid verification code", [], 400);
+  }
+
+  const user = await AdminUser.findById(req.adminUser._id).select("+passwordHash");
+  if (!user || !user.isActive) return failure(res, "Admin account is not active", [], 401);
+  user.passwordHash = await bcrypt.hash(req.body.password, 12);
+  await user.save();
+  await otp.deleteOne();
+  await recordActivity({
+    adminUser: req.adminUser._id,
+    action: "PASSWORD_CHANGED",
+    entityType: "AdminUser",
+    entityId: req.adminUser._id,
+    description: "Admin password changed after email OTP verification",
+  });
+  return success(res, null, "Password updated successfully");
+}
 
 export async function forgotPassword(req, res) {
   const user = await AdminUser.findOne({ email: req.body.email.toLowerCase(), isActive: true });

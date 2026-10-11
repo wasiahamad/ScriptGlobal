@@ -5,6 +5,7 @@ import { useTheme } from '@/lib/theme';
 import { useToast } from '@/lib/toast';
 import { useActivityLog } from '@/lib/useActivityLog';
 import { supabase } from '@/lib/supabase';
+import { apiRequest } from '@/lib/apiClient';
 import { PageHeader } from '@/components/ui';
 import { FormSection, Field } from '@/components/Form';
 import { StatusBadge } from '@/components/ui';
@@ -16,8 +17,9 @@ export default function SettingsPage() {
   const { logActivity } = useActivityLog();
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
-  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpRequested, setOtpRequested] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
@@ -35,12 +37,34 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
-  const handleChangePassword = async () => {
-    if (!newPassword || newPassword.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+  const handleRequestOtp = async () => {
+    if (!newPassword || newPassword.length < 8) { toast('Password must be at least 8 characters', 'error'); return; }
     setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) toast(error.message, 'error');
-    else { toast('Password updated'); setOldPassword(''); setNewPassword(''); }
+    try {
+      await apiRequest('/api/v1/auth/password-change/request-otp', { method: 'POST' });
+      setOtpRequested(true);
+      toast(`Verification code sent to ${session?.user?.email || 'your registered email'}`);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Unable to send verification code', 'error');
+    }
+    setChangingPassword(false);
+  };
+
+  const handleChangePassword = async () => {
+    if (!/^\d{6}$/.test(otp)) { toast('Enter the 6-digit verification code', 'error'); return; }
+    setChangingPassword(true);
+    try {
+      await apiRequest('/api/v1/auth/password-change/verify', {
+        method: 'POST',
+        body: JSON.stringify({ code: otp, password: newPassword }),
+      });
+      toast('Password updated successfully');
+      setNewPassword('');
+      setOtp('');
+      setOtpRequested(false);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Unable to update password', 'error');
+    }
     setChangingPassword(false);
   };
 
@@ -55,8 +79,16 @@ export default function SettingsPage() {
         </FormSection>
 
         <FormSection title="Security">
-          <Field label="New Password" hint="Minimum 6 characters"><input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input" placeholder="••••••••" /></Field>
-          <button onClick={handleChangePassword} disabled={changingPassword} className="btn btn-primary">{changingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Update Password</button>
+          <Field label="New Password" hint="Minimum 8 characters"><input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input" placeholder="••••••••" minLength={8} /></Field>
+          {otpRequested && (
+            <Field label="Email Verification Code" hint={`Enter the 6-digit code sent to ${session?.user?.email || 'your registered email'}`}>
+              <input type="text" inputMode="numeric" autoComplete="one-time-code" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} className="input tracking-[0.35em]" placeholder="000000" maxLength={6} />
+            </Field>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {!otpRequested && <button onClick={handleRequestOtp} disabled={changingPassword} className="btn btn-primary">{changingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Send Verification Code</button>}
+            {otpRequested && <><button onClick={handleChangePassword} disabled={changingPassword} className="btn btn-primary">{changingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Verify & Update Password</button><button onClick={handleRequestOtp} disabled={changingPassword} className="btn btn-secondary">Resend Code</button></>}
+          </div>
         </FormSection>
 
         <FormSection title="Theme">

@@ -102,3 +102,44 @@ export async function sendContactAutoReply(inquiry) {
   });
   return true;
 }
+
+export async function sendPasswordChangeOtp(user, code) {
+  const mailer = getTransporter();
+  if (!mailer) {
+    throw new Error("Password OTP email cannot be sent because SMTP configuration is incomplete");
+  }
+
+  await mailer.sendMail({
+    from: env.email.from,
+    to: user.email,
+    subject: "Your SciScript password change verification code",
+    text: [
+      `Dear ${user.name || "Administrator"},`,
+      "",
+      `Your password change verification code is: ${code}`,
+      "This code expires in 10 minutes and can be used only once.",
+      "",
+      "If you did not request this change, please contact your super administrator immediately.",
+      "",
+      "Kind regards,",
+      "SciScript Global Scientific Writing Services",
+    ].join("\n"),
+    html: `
+      <div style="margin:0;background:#f5f7f7;padding:32px 16px;font-family:Arial,sans-serif;color:#172126">
+        <div style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #dce7e6;border-radius:16px;overflow:hidden">
+          <div style="background:#082f2e;padding:28px 32px;color:#ffffff">
+            <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#7dd3c7">SciScript Admin</div>
+            <h1 style="margin:10px 0 0;font-size:24px;line-height:1.3">Password change verification</h1>
+          </div>
+          <div style="padding:32px">
+            <p style="font-size:16px;line-height:1.7;margin-top:0">Dear ${escapeHtml(user.name || "Administrator")},</p>
+            <p style="font-size:15px;line-height:1.7">Use the verification code below to update your admin password:</p>
+            <div style="margin:24px 0;padding:18px;text-align:center;background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;font-size:30px;letter-spacing:8px;font-weight:700;color:#115e59">${code}</div>
+            <p style="font-size:14px;line-height:1.7;color:#64748b">This code expires in 10 minutes and can be used only once. If you did not request this change, contact your super administrator immediately.</p>
+          </div>
+        </div>
+      </div>
+    `,
+  });
+  return true;
+}
